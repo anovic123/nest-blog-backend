@@ -1,15 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 
+import { BlogsQueryRepository } from '../infra/blogs-query.repository';
+
 import { BlogsRepository } from '../infra/blogs.repository';
 
 import { BlogsDocument } from '../domain/blogs.schema';
 
-import { BlogInputModel, BlogViewModel } from '../dto';
+import { BlogInputModel, BlogPostInputModel, BlogViewModel } from '../dto';
 
 @Injectable()
 export class BlogsService {
-  constructor(private blogsRepository: BlogsRepository) {}
+  constructor(
+    private blogsRepository: BlogsRepository,
+    private blogsQueryRepository: BlogsQueryRepository,
+  ) {}
 
   public async createBlog(body: BlogInputModel) {
     const newBlog = {
@@ -35,5 +40,22 @@ export class BlogsService {
 
   public async deleteBlog(id: BlogViewModel['id']): Promise<boolean> {
     return this.blogsRepository.deleteBlog(id);
+  }
+
+  public async createPostBlog(
+    blogId: string,
+    body: BlogPostInputModel,
+  ): Promise<BlogPostInputModel | null> {
+    try {
+      const findBlog = await this.blogsQueryRepository.findBlog(blogId);
+      if (!findBlog) {
+        return null;
+      }
+
+      return this.blogsRepository.createPostBlog(blogId, body);
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   }
 }
