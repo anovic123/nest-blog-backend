@@ -16,8 +16,6 @@ import { UsersService } from '../application/users.service';
 
 import { UsersQueryRepository } from '../infra/users-query.repository';
 
-import { getUsersHelper } from '../helper';
-
 @Controller('users')
 export class UsersController {
   constructor(
@@ -27,9 +25,7 @@ export class UsersController {
 
   @Get()
   public async getUsers(@Query() query: { [key: string]: string | undefined }) {
-    const sanitizedQuery = getUsersHelper(query);
-
-    return this.usersQueryRepository.allUsers(sanitizedQuery);
+    return this.usersQueryRepository.allUsers(query);
   }
 
   @Post()

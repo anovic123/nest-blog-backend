@@ -4,8 +4,10 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { User, UserDocument } from '../domain/users.schema';
 
+import { getUsersHelper } from '../helper';
 import { UserOutputType } from '../dto';
-import { PaginatedResponse } from 'src/types';
+
+import { PaginatedResponse } from '../../../types';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -13,28 +15,31 @@ export class UsersQueryRepository {
   public async allUsers(
     query: any,
   ): Promise<PaginatedResponse<UserOutputType>> {
-    const {
-      searchLoginTerm,
-      searchEmailTerm,
-      sortBy,
-      sortDirection,
-      pageNumber,
-      pageSize,
-    } = query;
+    const sanitizedQuery = getUsersHelper(query);
+
+    const { searchLoginTerm, searchEmailTerm, sortBy, pageNumber, pageSize } =
+      sanitizedQuery;
 
     const filter = {};
 
+    const conditions: Record<string, any> = [];
+
     if (searchLoginTerm) {
-      filter['accountData.login'] = { $regex: searchLoginTerm, $options: 'i' };
+      conditions.push({ login: { $regex: searchLoginTerm, $options: 'i' } });
     }
 
     if (searchEmailTerm) {
-      filter['accountData.email'] = { $regex: searchEmailTerm, $options: 'i' };
+      conditions.push({ email: { $regex: searchEmailTerm, $options: 'i' } });
+    }
+
+    if (conditions.length > 0) {
+      filter['$or'] = conditions;
     }
 
     try {
+      const sortDirection = sanitizedQuery.sortDirection === 'asc' ? 1 : -1;
       const users = await this.UserModel.find(filter)
-        .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
+        .sort({ [sortBy]: sortDirection })
         .skip((pageNumber - 1) * pageSize)
         .limit(pageSize);
 

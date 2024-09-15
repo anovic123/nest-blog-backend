@@ -6,7 +6,7 @@ import { TestingService } from '../application/testing.service';
 export class TestingController {
   constructor(private readonly testingService: TestingService) {}
 
-  @Delete()
+  @Delete('/all-data')
   @HttpCode(204)
   public async deleteAll() {
     return this.testingService.deleteAll();

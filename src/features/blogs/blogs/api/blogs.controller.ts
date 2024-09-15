@@ -17,8 +17,6 @@ import { BlogsQueryRepository } from '../infra/blogs-query.repository';
 
 import { BlogsService } from '../application/blogs.service';
 
-import { getAllBlogsHelper, GetAllBlogsHelperResult } from './../helper';
-
 import { BlogInputModel, BlogPostInputModel } from '../dto';
 
 @Controller('blogs')
@@ -44,9 +42,7 @@ export class BlogsController {
 
   @Get()
   public async getBlogs(@Query() query: { [key: string]: string | undefined }) {
-    const sanitizedQuery = getAllBlogsHelper(query) as GetAllBlogsHelperResult;
-
-    return this.blogsQueryRepository.getAllBlogs(sanitizedQuery);
+    return this.blogsQueryRepository.getAllBlogs(query);
   }
 
   @Get('/:id')
@@ -61,6 +57,7 @@ export class BlogsController {
   }
 
   @Put('/:id')
+  @HttpCode(204)
   public async putBlogs(@Body() body: BlogInputModel, @Param('id') id: string) {
     const updatedBlog = await this.blogsService.updateBlog(body, id);
 
@@ -93,7 +90,7 @@ export class BlogsController {
       blogId,
     );
 
-    if (!blogPostsResults) {
+    if (!blogPostsResults || blogPostsResults.items.length === 0) {
       throw new NotFoundException(`Blog posts with id ${blogId} not found`);
     }
 

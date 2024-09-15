@@ -21,10 +21,10 @@ export class TestingRepository {
   public async deleteAll(): Promise<boolean> {
     try {
       await Promise.all([
-        this.BlogModel.deleteMany([]),
-        this.PostModel.deleteMany([]),
-        this.CommentsModel.deleteMany([]),
-        this.UserModel.deleteMany([]),
+        this.BlogModel.deleteMany({}),
+        this.PostModel.deleteMany({}),
+        this.CommentsModel.deleteMany({}),
+        this.UserModel.deleteMany({}),
       ]);
 
       return true;

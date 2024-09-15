@@ -42,15 +42,16 @@ export class BlogsQueryRepository {
       ...search,
     };
 
+    const sortBy = sanitizedQuery.sortBy || 'createdAt';
+
     try {
       const sortDirection = sanitizedQuery.sortDirection === 'asc' ? 1 : -1;
       const items: BlogsDocument[] = await this.BlogModel.find(filter)
-        .sort(sanitizedQuery.sortBy, {
-          [sanitizedQuery.sortDirection]: sortDirection,
+        .sort({
+          [sortBy]: sortDirection,
         })
         .skip((sanitizedQuery.pageNumber - 1) * sanitizedQuery.pageSize)
-        .limit(sanitizedQuery.pageSize)
-        .exec();
+        .limit(sanitizedQuery.pageSize);
 
       const totalCount = await this.BlogModel.countDocuments(filter);
 

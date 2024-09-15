@@ -9,6 +9,12 @@ import {
 } from '../blogs/comments/domain/comments.schema';
 import { User, userSchema } from '../users/domain/users.schema';
 
+import { TestingService } from './application/testing.service';
+
+import { TestingRepository } from './infra/testing.repository';
+
+import { TestingController } from './api/testing.controller';
+
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -36,7 +42,7 @@ import { User, userSchema } from '../users/domain/users.schema';
       },
     ]),
   ],
-  controllers: [],
-  providers: [],
+  controllers: [TestingController],
+  providers: [TestingService, TestingRepository],
 })
 export class TestingModule {}
