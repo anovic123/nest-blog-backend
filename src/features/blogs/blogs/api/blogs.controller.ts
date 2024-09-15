@@ -9,6 +9,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 
@@ -18,7 +19,7 @@ import { BlogsService } from '../application/blogs.service';
 
 import { getAllBlogsHelper, GetAllBlogsHelperResult } from './../helper';
 
-import { BlogInputModel } from '../dto';
+import { BlogInputModel, BlogPostInputModel } from '../dto';
 
 @Controller('blogs')
 export class BlogsController {
@@ -59,7 +60,7 @@ export class BlogsController {
     return blog;
   }
 
-  @Get('/:id')
+  @Put('/:id')
   public async putBlogs(@Body() body: BlogInputModel, @Param('id') id: string) {
     const updatedBlog = await this.blogsService.updateBlog(body, id);
 
@@ -80,5 +81,36 @@ export class BlogsController {
     }
 
     return;
+  }
+
+  @Get('/:blogId/posts')
+  public async getBlogPosts(
+    @Param('blogId') blogId: string,
+    @Query() query: { [key: string]: string | undefined },
+  ) {
+    const blogPostsResults = await this.blogsQueryRepository.getBlogPosts(
+      query,
+      blogId,
+    );
+
+    if (!blogPostsResults) {
+      throw new NotFoundException(`Blog posts with id ${blogId} not found`);
+    }
+
+    return blogPostsResults;
+  }
+
+  @Post('/:blogId/posts')
+  public async createBlogsPost(
+    @Param('blogId') blogId: string,
+    @Body() body: BlogPostInputModel,
+  ) {
+    const newBlogPost = await this.blogsService.createPostBlog(blogId, body);
+
+    if (!newBlogPost) {
+      throw new NotFoundException(`Blog with id ${blogId} not found`);
+    }
+
+    return newBlogPost;
   }
 }
