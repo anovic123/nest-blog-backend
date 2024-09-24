@@ -50,4 +50,4 @@ import { Comments, commentsSchema } from './comments/domain/comments.schema';
     CommentsQueryRepository,
   ],
 })
-export class BlogsModule {}
+export class BlogersModule {}
