@@ -13,7 +13,7 @@ import { getAllPostsHelper, GetAllPostsHelperResult } from '../helper';
 import { LikePostStatus, PostViewModel } from '../dto';
 import { CommentDBType } from './../../comments/dto';
 
-import { PaginatedResponse } from '../../../../types';
+import { PaginatedResponse } from '../../../../base/types/pagination';
 
 @Injectable()
 export class PostsQueryRepository {

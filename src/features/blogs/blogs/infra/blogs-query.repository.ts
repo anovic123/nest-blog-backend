@@ -14,7 +14,7 @@ import {
 
 import { BlogPostViewModel, BlogViewModel } from '../dto';
 
-import { PaginatedResponse } from '../../../../types';
+import { PaginatedResponse } from '../../../../base/types/pagination';
 import { LikePostStatus, PostViewModel } from '../../posts/dto';
 
 @Injectable()

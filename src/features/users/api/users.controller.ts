@@ -15,6 +15,12 @@ import {
 import { UsersService } from '../application/users.service';
 
 import { UsersQueryRepository } from '../infra/users-query.repository';
+import { PaginationWithSearchLoginAndEmailTerm } from 'src/base/models/pagination.base.model';
+import { UserOutputModel } from './models/output/user.output.model';
+import { SortingPropertiesType } from 'src/base/types/sorting-properties.type';
+
+export const USERS_SORTING_PROPERTIES: SortingPropertiesType<UserOutputModel> =
+  ['login', 'email'];
 
 @Controller('users')
 export class UsersController {
@@ -24,8 +30,13 @@ export class UsersController {
   ) {}
 
   @Get()
-  public async getUsers(@Query() query: { [key: string]: string | undefined }) {
-    return this.usersQueryRepository.allUsers(query);
+  public async getUsers(@Query() query) {
+    const pagination: PaginationWithSearchLoginAndEmailTerm =
+      new PaginationWithSearchLoginAndEmailTerm(
+        query,
+        USERS_SORTING_PROPERTIES,
+      );
+    return this.usersQueryRepository.allUsers(pagination);
   }
 
   @Post()
