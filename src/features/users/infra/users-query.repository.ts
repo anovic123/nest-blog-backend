@@ -4,7 +4,6 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { User, UserDocument } from '../domain/users.schema';
 
-import { UserOutputType } from '../dto';
 import {
   PaginationOutput,
   PaginationWithSearchLoginAndEmailTerm,
@@ -42,7 +41,8 @@ export class UsersQueryRepository {
 
     return await this.__getResult(filter, pagination);
   }
-  public outputModelUser(user: UserDocument): UserOutputType {
+
+  public outputModelUser(user: UserDocument): UserOutputModel {
     return {
       id: user._id.toString(),
       createdAt: user.createdAt,
