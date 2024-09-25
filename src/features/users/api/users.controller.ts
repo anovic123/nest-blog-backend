@@ -18,6 +18,7 @@ import { UsersQueryRepository } from '../infra/users-query.repository';
 import { PaginationWithSearchLoginAndEmailTerm } from 'src/base/models/pagination.base.model';
 import { UserOutputModel } from './models/output/user.output.model';
 import { SortingPropertiesType } from 'src/base/types/sorting-properties.type';
+import { UserCreateModel } from './models/input/create-user.input.model';
 
 export const USERS_SORTING_PROPERTIES: SortingPropertiesType<UserOutputModel> =
   ['login', 'email'];
@@ -40,10 +41,8 @@ export class UsersController {
   }
 
   @Post()
-  public async registerUser(
-    @Body() body: { login: string; password: string; email: string },
-  ) {
-    const newUser = await this.usersService.createUser(body);
+  public async registerUser(@Body() createModel: UserCreateModel) {
+    const newUser = await this.usersService.createUser(createModel);
     if (!newUser) {
       throw new HttpException(
         'Error while registering user',

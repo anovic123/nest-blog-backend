@@ -2,21 +2,22 @@ import { Injectable } from '@nestjs/common';
 
 import { UsersRepository } from '../infra/users.repository';
 
-import { UserOutputType } from '../dto';
 import { CryptoService } from './crypto.service';
+
+import { UserOutputModel } from '../api/models/output/user.output.model';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private usersRepository: UsersRepository,
-    private cryptoService: CryptoService,
+    private readonly usersRepository: UsersRepository,
+    private readonly cryptoService: CryptoService,
   ) {}
 
   public async createUser(body: {
     login: string;
     password: string;
     email: string;
-  }): Promise<UserOutputType | null> {
+  }): Promise<UserOutputModel | null> {
     const passwordHash = await this.cryptoService.generateHash(
       body.password,
       10,

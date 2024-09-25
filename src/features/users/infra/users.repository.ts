@@ -4,39 +4,36 @@ import { Model, Types } from 'mongoose';
 
 import { User, UserDocument } from '../domain/users.schema';
 
-import { UserInputModel, UserOutputType } from '../dto';
+import { UserOutputModel } from '../api/models/output/user.output.model';
+import { UserCreateModel } from '../api/models/input/create-user.input.model';
 
 @Injectable()
 export class UsersRepository {
   constructor(@InjectModel(User.name) private UserModel: Model<UserDocument>) {}
 
-  public async createUser(user: UserInputModel & { passwordHash: string }) {
-    try {
-      const result = await this.UserModel.create(user);
+  public async createUser(user: UserCreateModel & { passwordHash: string }) {
+    const result = await this.UserModel.create(user);
 
-      if (!result) {
-        throw new Error('Error while creating user');
-      }
-
-      return this.outputModelUser(result);
-    } catch (error) {
-      throw new Error(error);
-    }
+    return this.outputModelUser(result);
   }
 
   public async deleteUser(id: string): Promise<boolean> {
-    try {
-      const result = await this.UserModel.deleteOne({
-        _id: new Types.ObjectId(id),
-      });
+    const result = await this.UserModel.deleteOne({
+      _id: new Types.ObjectId(id),
+    });
 
-      return result.deletedCount === 1;
-    } catch (error) {
-      throw new Error(error);
-    }
+    return result.deletedCount === 1;
   }
 
-  public outputModelUser(user: UserDocument): UserOutputType {
+  async emailIsExist(email: string): Promise<boolean> {
+    return !!(await this.UserModel.countDocuments({ email: email }));
+  }
+
+  async loginIsExist(login: string): Promise<boolean> {
+    return !!(await this.UserModel.countDocuments({ login: login }));
+  }
+
+  public outputModelUser(user: UserDocument): UserOutputModel {
     return {
       id: user._id.toString(),
       createdAt: user.createdAt,
