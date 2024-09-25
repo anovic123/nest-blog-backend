@@ -4,6 +4,10 @@ import { Module } from '@nestjs/common';
 import { UsersModule } from './features/users/users.module';
 import { BlogersModule } from './features/blogs/blogs.module';
 import { TestingModule } from './features/testing/testing.module';
+import {
+  EmailIsExistConstraint,
+  LoginIsExistConstraint,
+} from './common/decorators';
 
 @Module({
   imports: [
@@ -15,6 +19,6 @@ import { TestingModule } from './features/testing/testing.module';
     TestingModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [LoginIsExistConstraint, EmailIsExistConstraint],
 })
 export class AppModule {}
