@@ -1,14 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
-
-const PORT = 3000;
+import { applyAppSettings } from './settings/apply-app-settings';
+import { appSettings } from './settings/app-settings';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes();
-  await app.listen(PORT, () => {
-    console.log('App starting listen port: ', PORT);
+
+  applyAppSettings(app);
+
+  await app.listen(appSettings.api.APP_PORT, () => {
+    console.log('App starting listen port: ', appSettings.api.APP_PORT);
+    console.log('ENV', appSettings.env.getEnv);
   });
 }
 

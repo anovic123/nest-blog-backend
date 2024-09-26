@@ -10,6 +10,12 @@ import { UsersRepository } from './infra/users.repository';
 import { UsersQueryRepository } from './infra/users-query.repository';
 
 import { User, userSchema } from './domain/users.schema';
+import {
+  EmailIsExistConstraint,
+  LoginIsExistConstraint,
+} from 'src/common/decorators';
+import { APP_GUARD } from '@nestjs/core';
+import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
 
 @Module({
   imports: [
@@ -26,6 +32,12 @@ import { User, userSchema } from './domain/users.schema';
     UsersRepository,
     UsersQueryRepository,
     CryptoService,
+    EmailIsExistConstraint,
+    LoginIsExistConstraint,
+    {
+      provide: APP_GUARD,
+      useClass: BasicAuthGuard,
+    },
   ],
   exports: [UsersService],
 })

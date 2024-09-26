@@ -4,21 +4,20 @@ import { Module } from '@nestjs/common';
 import { UsersModule } from './features/users/users.module';
 import { BlogersModule } from './features/blogs/blogs.module';
 import { TestingModule } from './features/testing/testing.module';
-import {
-  EmailIsExistConstraint,
-  LoginIsExistConstraint,
-} from './common/decorators';
+import { appSettings } from './settings/app-settings';
 
 @Module({
   imports: [
     MongooseModule.forRoot(
-      'mongodb+srv://vkanaev220:Q2tgZaS1r9EQIx2i@api-v1.otqbeom.mongodb.net/?retryWrites=true&w=majority&appName=api-v1',
+      appSettings.env.isTesting()
+        ? appSettings.api.MONGO_CONNECTION_URI_FOR_TESTS
+        : appSettings.api.MONGO_CONNECTION_URI,
     ),
     UsersModule,
     BlogersModule,
     TestingModule,
   ],
   controllers: [],
-  providers: [LoginIsExistConstraint, EmailIsExistConstraint],
+  providers: [],
 })
 export class AppModule {}
