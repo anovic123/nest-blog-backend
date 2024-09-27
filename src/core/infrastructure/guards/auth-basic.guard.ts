@@ -4,8 +4,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import { appSettings } from 'src/settings/app-settings';
+import { ConfigurationType } from 'src/settings/configuration';
 
 export const fromUTF8ToBase64 = (code: string) => {
   const buff2 = Buffer.from(code, 'utf8');
@@ -15,6 +16,8 @@ export const fromUTF8ToBase64 = (code: string) => {
 
 @Injectable()
 export class BasicAuthGuard implements CanActivate {
+  constructor(private configService: ConfigService<ConfigurationType, true>) {}
+
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
     const authHeader = request.headers.authorization;
@@ -24,11 +27,12 @@ export class BasicAuthGuard implements CanActivate {
     }
 
     const base64Credentials = authHeader.slice(6).trim();
+
+    const apiSettings = this.configService.get('apiSettings', { infer: true });
+
     const validBase64Credentials = fromUTF8ToBase64(
-      `${appSettings.api.ADMIN_LOGIN}:${appSettings.api.ADMIN_PASSWORD}`,
+      `${apiSettings.ADMIN_LOGIN}:${apiSettings.ADMIN_PASSWORD}`,
     );
-    console.log(validBase64Credentials);
-    console.log(base64Credentials);
     if (base64Credentials !== validBase64Credentials) {
       throw new UnauthorizedException();
     }

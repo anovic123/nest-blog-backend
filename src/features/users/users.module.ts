@@ -4,7 +4,6 @@ import { Module } from '@nestjs/common';
 import { UsersService } from './application/users.service';
 
 import { UsersController } from './api/users.controller';
-import { CryptoService } from './application/crypto.service';
 
 import { UsersRepository } from './infra/users.repository';
 import { UsersQueryRepository } from './infra/users-query.repository';
@@ -16,6 +15,7 @@ import {
 } from 'src/common/decorators';
 import { APP_GUARD } from '@nestjs/core';
 import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
+import { CryptoService } from 'src/core/application/crypto-service';
 
 @Module({
   imports: [

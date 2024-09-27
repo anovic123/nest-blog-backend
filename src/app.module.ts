@@ -1,21 +1,26 @@
 import { MongooseModule } from '@nestjs/mongoose';
-
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+
 import { UsersModule } from './features/users/users.module';
 import { BlogersModule } from './features/blogs/blogs.module';
 import { TestingModule } from './features/testing/testing.module';
-import { appSettings } from './settings/app-settings';
+
+import configuration from './settings/configuration';
 
 @Module({
   imports: [
     MongooseModule.forRoot(
-      appSettings.env.isTesting()
-        ? appSettings.api.MONGO_CONNECTION_URI_FOR_TESTS
-        : appSettings.api.MONGO_CONNECTION_URI,
+      'mongodb+srv://vkanaev220:Q2tgZaS1r9EQIx2i@api-v1.otqbeom.mongodb.net/?retryWrites=true&w=majority&appName=api-v1',
     ),
     UsersModule,
     BlogersModule,
     TestingModule,
+    ConfigModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+    }),
   ],
   controllers: [],
   providers: [],
