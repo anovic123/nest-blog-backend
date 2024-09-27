@@ -10,6 +10,7 @@ import {
   HttpException,
   HttpStatus,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common';
 
 import { UsersService } from '../application/users.service';
@@ -19,6 +20,7 @@ import { PaginationWithSearchLoginAndEmailTerm } from 'src/base/models/paginatio
 import { UserOutputModel } from './models/output/user.output.model';
 import { SortingPropertiesType } from 'src/base/types/sorting-properties.type';
 import { UserCreateModel } from './models/input/create-user.input.model';
+import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
 
 export const USERS_SORTING_PROPERTIES: SortingPropertiesType<UserOutputModel> =
   ['login', 'email'];
@@ -30,6 +32,7 @@ export class UsersController {
     private readonly usersQueryRepository: UsersQueryRepository,
   ) {}
 
+  @UseGuards(BasicAuthGuard)
   @Get()
   public async getUsers(@Query() query) {
     const pagination: PaginationWithSearchLoginAndEmailTerm =
@@ -40,6 +43,7 @@ export class UsersController {
     return this.usersQueryRepository.allUsers(pagination);
   }
 
+  @UseGuards(BasicAuthGuard)
   @Post()
   public async registerUser(@Body() createModel: UserCreateModel) {
     const newUser = await this.usersService.createUser(createModel);
@@ -52,6 +56,7 @@ export class UsersController {
     return newUser;
   }
 
+  @UseGuards(BasicAuthGuard)
   @Delete('/:id')
   @HttpCode(204)
   public async deleteUser(@Param('id') id: string) {

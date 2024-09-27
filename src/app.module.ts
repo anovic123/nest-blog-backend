@@ -1,9 +1,12 @@
 import { MongooseModule } from '@nestjs/mongoose';
-
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+
 import { UsersModule } from './features/users/users.module';
 import { BlogersModule } from './features/blogs/blogs.module';
 import { TestingModule } from './features/testing/testing.module';
+
+import configuration from './settings/configuration';
 
 @Module({
   imports: [
@@ -13,6 +16,11 @@ import { TestingModule } from './features/testing/testing.module';
     UsersModule,
     BlogersModule,
     TestingModule,
+    ConfigModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+    }),
   ],
   controllers: [],
   providers: [],

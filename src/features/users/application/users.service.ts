@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 
 import { UsersRepository } from '../infra/users.repository';
 
-import { CryptoService } from './crypto.service';
-
 import { UserOutputModel } from '../api/models/output/user.output.model';
+import { CryptoService } from 'src/core/application/crypto-service';
 
 @Injectable()
 export class UsersService {
