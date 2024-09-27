@@ -14,13 +14,17 @@ import {
 } from '@nestjs/common';
 
 import { UsersService } from '../application/users.service';
+import { AuthService } from 'src/features/auth/application/auth.service';
 
-import { UsersQueryRepository } from '../infra/users-query.repository';
+import { SortingPropertiesType } from 'src/base/types/sorting-properties.type';
+
+import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
+
+import { UserCreateModel } from './models/input/create-user.input.model';
 import { PaginationWithSearchLoginAndEmailTerm } from 'src/base/models/pagination.base.model';
 import { UserOutputModel } from './models/output/user.output.model';
-import { SortingPropertiesType } from 'src/base/types/sorting-properties.type';
-import { UserCreateModel } from './models/input/create-user.input.model';
-import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
+
+import { UsersQueryRepository } from '../infra/users-query.repository';
 
 export const USERS_SORTING_PROPERTIES: SortingPropertiesType<UserOutputModel> =
   ['login', 'email'];
@@ -30,6 +34,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly usersQueryRepository: UsersQueryRepository,
+    private readonly authService: AuthService,
   ) {}
 
   @UseGuards(BasicAuthGuard)
@@ -46,7 +51,7 @@ export class UsersController {
   @UseGuards(BasicAuthGuard)
   @Post()
   public async registerUser(@Body() createModel: UserCreateModel) {
-    const newUser = await this.usersService.createUser(createModel);
+    const newUser = await this.authService.createUser(createModel);
     if (!newUser) {
       throw new HttpException(
         'Error while registering user',

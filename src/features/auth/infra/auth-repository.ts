@@ -1,0 +1,28 @@
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+
+import { User, UserDocument } from 'src/features/users/domain/users.schema';
+
+import { UserOutputModel } from '../api/models/output/user.output.model';
+import { UserCreateModel } from '../api/models/input/create-user.input.model';
+
+@Injectable()
+export class AuthRepository {
+  constructor(@InjectModel(User.name) private UserModel: Model<UserDocument>) {}
+
+  public async createUser(user: UserCreateModel & { passwordHash: string }) {
+    const result = await this.UserModel.create(user);
+
+    return this.outputModelUser(result);
+  }
+
+  public outputModelUser(user: UserDocument): UserOutputModel {
+    return {
+      id: user._id.toString(),
+      createdAt: user.accountData.createdAt.toISOString(),
+      email: user.accountData.email,
+      login: user.accountData.login,
+    };
+  }
+}

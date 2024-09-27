@@ -42,15 +42,6 @@ export class UsersQueryRepository {
     return await this.__getResult(filter, pagination);
   }
 
-  public outputModelUser(user: UserDocument): UserOutputModel {
-    return {
-      id: user._id.toString(),
-      createdAt: user.createdAt,
-      email: user.email,
-      login: user.login,
-    };
-  }
-
   private async __getResult(
     filter: FilterQuery<User>,
     pagination: PaginationWithSearchLoginAndEmailTerm,

@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './features/users/users.module';
 import { BlogersModule } from './features/blogs/blogs.module';
 import { TestingModule } from './features/testing/testing.module';
+import { AuthModule } from './features/auth/auth.module';
 
 import configuration from './settings/configuration';
 
@@ -13,10 +14,10 @@ import configuration from './settings/configuration';
     MongooseModule.forRoot(
       'mongodb+srv://vkanaev220:Q2tgZaS1r9EQIx2i@api-v1.otqbeom.mongodb.net/?retryWrites=true&w=majority&appName=api-v1',
     ),
-    UsersModule,
     BlogersModule,
     TestingModule,
-    ConfigModule,
+    UsersModule,
+    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],

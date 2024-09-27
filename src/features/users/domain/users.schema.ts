@@ -1,30 +1,45 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model, Schema as SchemaMongoose } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
 @Schema()
-export class User {
-  @Prop()
-  id: SchemaMongoose.Types.ObjectId;
-  @Prop({
-    required: true,
-  })
-  createdAt: string;
-  @Prop({
-    required: true,
-  })
-  login: string;
-  @Prop({
-    required: true,
-  })
+export class UserAccountData {
+  @Prop({ type: String, required: true })
   email: string;
-  @Prop({
-    required: true,
-  })
-  password: string;
+
+  @Prop({ type: String, required: true })
+  login: string;
+
+  @Prop({ type: String, required: true })
+  passwordHash: string;
+
+  @Prop({ type: Date, required: true })
+  createdAt: Date;
+}
+
+@Schema()
+export class EmailConfirmation {
+  @Prop({ type: Boolean, required: true })
+  isConfirmed: boolean;
+
+  @Prop({ type: String, required: true })
+  confirmationCode: string;
+
+  @Prop({ type: Date, required: true })
+  expirationDate: Date;
+}
+
+@Schema()
+export class User {
+  @Prop({ type: MongooseSchema.Types.ObjectId, required: true })
+  _id: MongooseSchema.Types.ObjectId;
+
+  @Prop({ type: UserAccountData, required: true })
+  accountData: UserAccountData;
+
+  @Prop({ type: EmailConfirmation, required: true })
+  emailConfirmation: EmailConfirmation;
 }
 
 export const userSchema = SchemaFactory.createForClass(User);
-
-export type UserModelType = Model<UserDocument>;

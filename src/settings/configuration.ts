@@ -16,11 +16,10 @@ const getConfig = (
   return {
     apiSettings: {
       PORT: Number.parseInt(environmentVariables.PORT || '3000'),
-      LOCAL_HOST: environmentVariables.LOCAL_HOST,
-      PUBLIC_FRIEND_FRONT_URL: environmentVariables.PUBLIC_FRIEND_FRONT_URL,
       ADMIN_LOGIN: environmentVariables.ADMIN_LOGIN,
       ADMIN_PASSWORD: environmentVariables.ADMIN_PASSWORD,
       JWT_SECRET: environmentVariables.JWT_SECRET,
+      HASH_ROUNDS: environmentVariables.HASH_ROUNDS,
     },
 
     databaseSettings: {

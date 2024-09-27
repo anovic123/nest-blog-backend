@@ -13,7 +13,7 @@ export const UserOutputModelMapper = (user: UserDocument): UserOutputModel => {
   outputModel.id = user.id;
   outputModel.login = user.accountData.login;
   outputModel.email = user.accountData.email;
-  outputModel.createdAt = user.accountData.createdAt.toISOString();
+  outputModel.createdAt = user.accountData.createdAt.toString();
 
   return outputModel;
 };
