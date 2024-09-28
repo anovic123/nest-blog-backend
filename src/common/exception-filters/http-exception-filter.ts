@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable prettier/prettier */
 import {
   ArgumentsHost,
   Catch,
@@ -8,6 +6,11 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+
+interface ErrorMessage {
+  message: string;
+  field: string;
+}
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -18,21 +21,30 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
 
     if (status === HttpStatus.BAD_REQUEST) {
-      const errorsResponse = {
+      const errorsResponse: { errorsMessages: ErrorMessage[] } = {
         errorsMessages: [],
       };
 
       const responseBody: any = exception.getResponse();
 
-      if (Array.isArray(responseBody.message)) {
-        responseBody.message.forEach((e) =>
-        // @ts-ignore
-          errorsResponse.errorsMessages.push(e),
-        );
-      } else {
-        // @ts-ignore
-        errorsResponse.errorsMessages.push(responseBody.message);
-      }
+      const extractErrors = (error: any): void => {
+        if (Array.isArray(error.message)) {
+          error.message.forEach((nestedError) => {
+            extractErrors(nestedError);
+          });
+        } else {
+          errorsResponse.errorsMessages.push({
+            message:
+              typeof error.message === 'string' ? error.message : String(error),
+            field:
+              typeof error.key === 'string'
+                ? error.key
+                : responseBody?.split(' ')[0],
+          });
+        }
+      };
+
+      extractErrors(responseBody);
 
       response.status(status).send(errorsResponse);
     } else {

@@ -23,13 +23,19 @@ export class UsersQueryRepository {
 
     if (pagination.searchEmailTerm) {
       filters.push({
-        email: { $regex: pagination.searchEmailTerm, $options: 'i' },
+        'accountData.email': {
+          $regex: pagination.searchEmailTerm,
+          $options: 'i',
+        },
       });
     }
 
     if (pagination.searchLoginTerm) {
       filters.push({
-        login: { $regex: pagination.searchLoginTerm, $options: 'i' },
+        'accountData.login': {
+          $regex: pagination.searchLoginTerm,
+          $options: 'i',
+        },
       });
     }
 
@@ -42,13 +48,27 @@ export class UsersQueryRepository {
     return await this.__getResult(filter, pagination);
   }
 
-  public outputModelUser(user: UserDocument): UserOutputModel {
-    return {
-      id: user._id.toString(),
-      createdAt: user.createdAt,
-      email: user.email,
-      login: user.login,
-    };
+  public async findUserByConfirmationCode(code: string): Promise<User | null> {
+    const user = await this.UserModel.findOne({
+      'emailConfirmation.confirmationCode': code,
+    });
+
+    return user ? (user.toObject() as User) : null;
+  }
+
+  public async findUserByLoginOrEmail(
+    loginOrEmail: string,
+  ): Promise<User | null> {
+    const user = await this.UserModel.findOne({
+      $or: [
+        { 'accountData.login': loginOrEmail },
+        {
+          'accountData.email': loginOrEmail,
+        },
+      ],
+    });
+
+    return user ? user.toObject() : null;
   }
 
   private async __getResult(
@@ -57,7 +77,9 @@ export class UsersQueryRepository {
   ): Promise<PaginationOutput<UserOutputModel>> {
     const users = await this.UserModel.find(filter)
       .sort({
-        [pagination.sortBy]: pagination.getSortDirectionInNumericFormat(),
+        [pagination.sortBy === 'login'
+          ? 'accountData.login'
+          : pagination.sortBy]: pagination.getSortDirectionInNumericFormat(),
       })
       .skip(pagination.getSkipItemsCount())
       .limit(pagination.pageSize);

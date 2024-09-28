@@ -2,6 +2,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Module } from '@nestjs/common';
 
 import { UsersService } from './application/users.service';
+import { CryptoService } from 'src/core/application/crypto-service';
 
 import { UsersController } from './api/users.controller';
 
@@ -13,9 +14,10 @@ import {
   EmailIsExistConstraint,
   LoginIsExistConstraint,
 } from 'src/common/decorators';
-import { APP_GUARD } from '@nestjs/core';
-import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
-import { CryptoService } from 'src/core/application/crypto-service';
+
+import { AuthService } from '../auth/application/auth.service';
+import { AuthRepository } from '../auth/infra/auth-repository';
+import { EmailModule } from 'src/core/email.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { CryptoService } from 'src/core/application/crypto-service';
         schema: userSchema,
       },
     ]),
+    UsersModule,
+    EmailModule,
   ],
   controllers: [UsersController],
   providers: [
@@ -34,10 +38,8 @@ import { CryptoService } from 'src/core/application/crypto-service';
     CryptoService,
     EmailIsExistConstraint,
     LoginIsExistConstraint,
-    {
-      provide: APP_GUARD,
-      useClass: BasicAuthGuard,
-    },
+    AuthRepository,
+    AuthService,
   ],
   exports: [UsersService],
 })

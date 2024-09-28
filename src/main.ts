@@ -18,11 +18,10 @@ async function bootstrap() {
   });
 
   const port = apiSettings.PORT;
-  console.log('🚀 ~ bootstrap ~ port:', port);
 
   await app.listen(port, () => {
-    console.log('App starting listen port: ', port);
-    console.log('ENV', environmentSettings.currentEnv);
+    console.log('PORT:', port);
+    console.log('ENV:', environmentSettings.currentEnv);
   });
 }
 

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
+import { Observable } from 'rxjs';
 import { ConfigurationType } from 'src/settings/configuration';
 
 export const fromUTF8ToBase64 = (code: string) => {
@@ -18,7 +19,9 @@ export const fromUTF8ToBase64 = (code: string) => {
 export class BasicAuthGuard implements CanActivate {
   constructor(private configService: ConfigService<ConfigurationType, true>) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const authHeader = request.headers.authorization;
 
@@ -29,7 +32,6 @@ export class BasicAuthGuard implements CanActivate {
     const base64Credentials = authHeader.slice(6).trim();
 
     const apiSettings = this.configService.get('apiSettings', { infer: true });
-
     const validBase64Credentials = fromUTF8ToBase64(
       `${apiSettings.ADMIN_LOGIN}:${apiSettings.ADMIN_PASSWORD}`,
     );
