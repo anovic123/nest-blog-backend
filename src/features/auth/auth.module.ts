@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+// import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AuthController } from './api/auth.controller';
 
-import { AuthGuard } from 'src/core/infrastructure/guards/auth.guard';
+// import { AuthGuard } from 'src/core/infrastructure/guards/auth.guard';
 
 import { AuthService } from './application/auth.service';
 
@@ -17,6 +17,10 @@ import { EmailsManager } from 'src/core/managers/email.manager';
 import { EmailModule } from 'src/core/email.module';
 import { UsersQueryRepository } from '../users/infra/users-query.repository';
 import { UsersRepository } from '../users/infra/users.repository';
+import {
+  EmailIsExistConstraint,
+  LoginIsExistConstraint,
+} from 'src/common/decorators';
 
 @Module({
   imports: [
@@ -43,6 +47,8 @@ import { UsersRepository } from '../users/infra/users.repository';
     CryptoService,
     EmailsManager,
     UsersQueryRepository,
+    EmailIsExistConstraint,
+    LoginIsExistConstraint,
     UsersRepository,
   ],
   controllers: [AuthController],

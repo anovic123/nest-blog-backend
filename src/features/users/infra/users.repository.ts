@@ -17,11 +17,15 @@ export class UsersRepository {
   }
 
   public async emailIsExist(email: string): Promise<boolean> {
-    return !!(await this.UserModel.countDocuments({ email: email }));
+    return !!(await this.UserModel.countDocuments({
+      'accountData.email': email,
+    }));
   }
 
   public async loginIsExist(login: string): Promise<boolean> {
-    return !!(await this.UserModel.countDocuments({ login: login }));
+    return !!(await this.UserModel.countDocuments({
+      'accountData.login': login,
+    }));
   }
 
   public async updateConfirmation(_id: User['_id']): Promise<boolean> {
@@ -51,6 +55,14 @@ export class UsersRepository {
     );
 
     return result.modifiedCount === 1;
+  }
+
+  public async findUserById(id: User['_id']): Promise<User | null> {
+    const user = await this.UserModel.findOne({
+      _id: id,
+    });
+
+    return user ? user?.toObject() : null;
   }
 
   public async updateUserPasswordHash(

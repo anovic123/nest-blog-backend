@@ -74,35 +74,25 @@ export class AuthService {
     return createdResult;
   }
 
-  public async confirmEmail(
-    confirmationCode: CodeInputModel,
-  ): Promise<boolean> {
+  public async confirmEmail(confirmationCode: CodeInputModel): Promise<void> {
     const user = await this.usersQueryRepository.findUserByConfirmationCode(
       confirmationCode.code,
     );
     if (!user) {
-      return false;
+      throw new HttpException('code is wrong', HttpStatus.BAD_REQUEST);
     }
     if (
       user.emailConfirmation.isConfirmed ||
       user.emailConfirmation.confirmationCode !== confirmationCode.code ||
       user.emailConfirmation.expirationDate < new Date()
     ) {
-      throw new HttpException(
-        'Error while confirm email',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('code is wrong', HttpStatus.BAD_REQUEST);
     }
     const res = await this.usersRepository.updateConfirmation(user._id);
 
     if (!res) {
-      throw new HttpException(
-        'Error while confirm email',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('code is wrong', HttpStatus.BAD_REQUEST);
     }
-
-    return true;
   }
 
   public async resendCode(emailResendingModel: EmailResendingModel) {
@@ -111,7 +101,11 @@ export class AuthService {
     const user = await this.usersQueryRepository.findUserByLoginOrEmail(email);
 
     if (!user) {
-      throw new HttpException('User is not existed', HttpStatus.BAD_REQUEST);
+      throw new HttpException('email is not existed', HttpStatus.BAD_REQUEST);
+    }
+
+    if (user.emailConfirmation.isConfirmed) {
+      throw new HttpException('email is confirmed', HttpStatus.BAD_REQUEST);
     }
 
     const newCode = uuidv4();
@@ -123,8 +117,6 @@ export class AuthService {
       email: user.accountData.email,
       confirmationCode: newCode,
     });
-
-    return true;
   }
 
   public async changeNewPassword({
@@ -188,13 +180,23 @@ export class AuthService {
       await this.usersQueryRepository.findUserByLoginOrEmail(loginOrEmail);
 
     if (!user) {
-      throw new HttpException('User is not founded', HttpStatus.BAD_REQUEST);
+      throw new HttpException('User is not founded', HttpStatus.UNAUTHORIZED);
     }
 
-    const passwordHash = await this.cryptoService.generateHash(password);
+    // if (!user.emailConfirmation.isConfirmed) {
+    //   throw new HttpException(
+    //     'User account is not confirmed',
+    //     HttpStatus.BAD_REQUEST,
+    //   );
+    // }
 
-    if (user.accountData.passwordHash !== passwordHash) {
-      throw new HttpException('Password is wrong', HttpStatus.BAD_REQUEST);
+    const isHashedEquals = await this.cryptoService.compareHash(
+      password,
+      user.accountData.passwordHash,
+    );
+
+    if (!isHashedEquals) {
+      throw new HttpException('Password is wrong', HttpStatus.UNAUTHORIZED);
     }
 
     const userId = user._id.toString();
@@ -204,5 +206,25 @@ export class AuthService {
     };
 
     return userAccessToken;
+  }
+
+  public async getMeInfo(id: User['_id']): Promise<{
+    email: string;
+    login: string;
+    userId: string;
+  }> {
+    const user = await this.usersRepository.findUserById(id);
+
+    if (!user) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    const userOutput = {
+      email: user.accountData.email,
+      login: user.accountData.login,
+      userId: user._id.toString(),
+    };
+
+    return userOutput;
   }
 }
