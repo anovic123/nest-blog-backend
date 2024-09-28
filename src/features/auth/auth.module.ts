@@ -1,11 +1,8 @@
 import { Module } from '@nestjs/common';
-// import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AuthController } from './api/auth.controller';
-
-// import { AuthGuard } from 'src/core/infrastructure/guards/auth.guard';
 
 import { AuthService } from './application/auth.service';
 
@@ -38,10 +35,6 @@ import {
     EmailModule,
   ],
   providers: [
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: AuthGuard,
-    // },
     AuthService,
     AuthRepository,
     CryptoService,

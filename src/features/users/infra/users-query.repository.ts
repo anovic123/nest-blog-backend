@@ -23,13 +23,19 @@ export class UsersQueryRepository {
 
     if (pagination.searchEmailTerm) {
       filters.push({
-        email: { $regex: pagination.searchEmailTerm, $options: 'i' },
+        'accountData.email': {
+          $regex: pagination.searchEmailTerm,
+          $options: 'i',
+        },
       });
     }
 
     if (pagination.searchLoginTerm) {
       filters.push({
-        login: { $regex: pagination.searchLoginTerm, $options: 'i' },
+        'accountData.login': {
+          $regex: pagination.searchLoginTerm,
+          $options: 'i',
+        },
       });
     }
 
@@ -71,7 +77,9 @@ export class UsersQueryRepository {
   ): Promise<PaginationOutput<UserOutputModel>> {
     const users = await this.UserModel.find(filter)
       .sort({
-        [pagination.sortBy]: pagination.getSortDirectionInNumericFormat(),
+        [pagination.sortBy === 'login'
+          ? 'accountData.login'
+          : pagination.sortBy]: pagination.getSortDirectionInNumericFormat(),
       })
       .skip(pagination.getSkipItemsCount())
       .limit(pagination.pageSize);

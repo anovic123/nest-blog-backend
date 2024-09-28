@@ -19,7 +19,7 @@ export class AuthRepository {
   public outputModelUser(user: UserDocument): UserOutputModel {
     return {
       id: user._id.toString(),
-      createdAt: user.accountData.createdAt.toISOString(),
+      createdAt: user.createdAt.toISOString(),
       email: user.accountData.email,
       login: user.accountData.login,
     };

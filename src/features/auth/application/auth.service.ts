@@ -46,7 +46,6 @@ export class AuthService {
         login,
         email,
         passwordHash,
-        createdAt: new Date(),
       },
       emailConfirmation: {
         confirmationCode: uuidv4(),
@@ -56,6 +55,7 @@ export class AuthService {
         }),
         isConfirmed: false,
       },
+      createdAt: new Date(),
     };
     const createdResult = await this.authRepository.createUser(user);
 
@@ -182,13 +182,6 @@ export class AuthService {
     if (!user) {
       throw new HttpException('User is not founded', HttpStatus.UNAUTHORIZED);
     }
-
-    // if (!user.emailConfirmation.isConfirmed) {
-    //   throw new HttpException(
-    //     'User account is not confirmed',
-    //     HttpStatus.BAD_REQUEST,
-    //   );
-    // }
 
     const isHashedEquals = await this.cryptoService.compareHash(
       password,

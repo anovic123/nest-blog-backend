@@ -13,9 +13,6 @@ export class UserAccountData {
 
   @Prop({ type: String, required: true })
   passwordHash: string;
-
-  @Prop({ type: Date, required: true })
-  createdAt: Date;
 }
 
 @Schema()
@@ -40,6 +37,9 @@ export class User {
 
   @Prop({ type: EmailConfirmation, required: true })
   emailConfirmation: EmailConfirmation;
+
+  @Prop({ type: Date, required: true })
+  createdAt: Date;
 }
 
 export const userSchema = SchemaFactory.createForClass(User);
