@@ -13,6 +13,12 @@ import { IS_PUBLIC_KEY } from 'src/common/decorators/public.decorator';
 
 import { ConfigurationType } from 'src/settings/configuration';
 
+interface JwtPayload {
+  userId: string;
+  email: string;
+  login: string;
+}
+
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
@@ -42,7 +48,7 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: apiSettings.JWT_SECRET,
       });
-      request['user'] = payload;
+      request['user'] = payload as JwtPayload;
     } catch {
       throw new UnauthorizedException();
     }

@@ -29,6 +29,7 @@ import { UsersQueryRepository } from '../infra/users-query.repository';
 export const USERS_SORTING_PROPERTIES: SortingPropertiesType<UserOutputModel> =
   ['login', 'email'];
 
+@UseGuards(BasicAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(
@@ -37,7 +38,6 @@ export class UsersController {
     private readonly authService: AuthService,
   ) {}
 
-  @UseGuards(BasicAuthGuard)
   @Get()
   public async getUsers(@Query() query) {
     const pagination: PaginationWithSearchLoginAndEmailTerm =
@@ -48,7 +48,6 @@ export class UsersController {
     return this.usersQueryRepository.allUsers(pagination);
   }
 
-  @UseGuards(BasicAuthGuard)
   @Post()
   public async registerUser(@Body() createModel: UserCreateModel) {
     const newUser = await this.authService.createUser(createModel);
@@ -61,7 +60,6 @@ export class UsersController {
     return newUser;
   }
 
-  @UseGuards(BasicAuthGuard)
   @Delete('/:id')
   @HttpCode(204)
   public async deleteUser(@Param('id') id: string) {

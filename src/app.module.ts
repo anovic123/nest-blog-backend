@@ -14,14 +14,14 @@ import configuration from './settings/configuration';
     MongooseModule.forRoot(
       'mongodb+srv://vkanaev220:Q2tgZaS1r9EQIx2i@api-v1.otqbeom.mongodb.net/?retryWrites=true&w=majority&appName=api-v1',
     ),
-    BlogersModule,
-    TestingModule,
-    UsersModule,
-    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
     }),
+    UsersModule,
+    BlogersModule,
+    TestingModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],

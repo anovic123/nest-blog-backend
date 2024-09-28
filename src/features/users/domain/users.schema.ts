@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -33,7 +33,7 @@ export class EmailConfirmation {
 @Schema()
 export class User {
   @Prop({ type: MongooseSchema.Types.ObjectId, required: true })
-  _id: MongooseSchema.Types.ObjectId;
+  _id: Types.ObjectId;
 
   @Prop({ type: UserAccountData, required: true })
   accountData: UserAccountData;

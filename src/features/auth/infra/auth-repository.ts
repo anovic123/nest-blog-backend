@@ -5,13 +5,12 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from 'src/features/users/domain/users.schema';
 
 import { UserOutputModel } from '../api/models/output/user.output.model';
-import { UserCreateModel } from '../api/models/input/create-user.input.model';
 
 @Injectable()
 export class AuthRepository {
   constructor(@InjectModel(User.name) private UserModel: Model<UserDocument>) {}
 
-  public async createUser(user: UserCreateModel & { passwordHash: string }) {
+  public async createUser(user: User) {
     const result = await this.UserModel.create(user);
 
     return this.outputModelUser(result);

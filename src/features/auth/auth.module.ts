@@ -13,6 +13,10 @@ import { CryptoService } from 'src/core/application/crypto-service';
 
 import { AuthRepository } from './infra/auth-repository';
 import { User, userSchema } from '../users/domain/users.schema';
+import { EmailsManager } from 'src/core/managers/email.manager';
+import { EmailModule } from 'src/core/email.module';
+import { UsersQueryRepository } from '../users/infra/users-query.repository';
+import { UsersRepository } from '../users/infra/users.repository';
 
 @Module({
   imports: [
@@ -27,15 +31,19 @@ import { User, userSchema } from '../users/domain/users.schema';
         schema: userSchema,
       },
     ]),
+    EmailModule,
   ],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: AuthGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: AuthGuard,
+    // },
     AuthService,
     AuthRepository,
     CryptoService,
+    EmailsManager,
+    UsersQueryRepository,
+    UsersRepository,
   ],
   controllers: [AuthController],
   exports: [AuthService],

@@ -42,6 +42,29 @@ export class UsersQueryRepository {
     return await this.__getResult(filter, pagination);
   }
 
+  public async findUserByConfirmationCode(code: string): Promise<User | null> {
+    const user = await this.UserModel.findOne({
+      'emailConfirmation.confirmationCode': code,
+    });
+
+    return user ? (user.toObject() as User) : null;
+  }
+
+  public async findUserByLoginOrEmail(
+    loginOrEmail: string,
+  ): Promise<User | null> {
+    const user = await this.UserModel.findOne({
+      $or: [
+        { 'accountData.login': loginOrEmail },
+        {
+          'accountData.email': loginOrEmail,
+        },
+      ],
+    });
+
+    return user ? user.toObject() : null;
+  }
+
   private async __getResult(
     filter: FilterQuery<User>,
     pagination: PaginationWithSearchLoginAndEmailTerm,

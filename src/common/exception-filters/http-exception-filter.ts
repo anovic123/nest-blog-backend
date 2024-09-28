@@ -25,13 +25,19 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const responseBody: any = exception.getResponse();
 
       if (Array.isArray(responseBody.message)) {
-        responseBody.message.forEach((e) =>
-        // @ts-ignore
-          errorsResponse.errorsMessages.push(e),
-        );
+        responseBody.message.forEach((error) => {
+          // @ts-ignore
+          errorsResponse.errorsMessages.push({
+            message: error.message, 
+            field: error.key,
+          });
+        });
       } else {
         // @ts-ignore
-        errorsResponse.errorsMessages.push(responseBody.message);
+        errorsResponse.errorsMessages.push({
+          message: responseBody.message,
+          field: 'unknown',
+        });
       }
 
       response.status(status).send(errorsResponse);

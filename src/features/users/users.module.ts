@@ -19,6 +19,10 @@ import {
 import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
 
 import { AuthModule } from '../auth/auth.module';
+import { AuthService } from '../auth/application/auth.service';
+import { AuthRepository } from '../auth/infra/auth-repository';
+import { EmailsManager } from 'src/core/managers/email.manager';
+import { EmailModule } from 'src/core/email.module';
 
 @Module({
   imports: [
@@ -28,20 +32,23 @@ import { AuthModule } from '../auth/auth.module';
         schema: userSchema,
       },
     ]),
-    AuthModule,
+    UsersModule,
+    EmailModule,
   ],
   controllers: [UsersController],
   providers: [
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: BasicAuthGuard,
+    // },
     UsersService,
     UsersRepository,
     UsersQueryRepository,
     CryptoService,
     EmailIsExistConstraint,
     LoginIsExistConstraint,
-    {
-      provide: APP_GUARD,
-      useClass: BasicAuthGuard,
-    },
+    AuthRepository,
+    AuthService,
   ],
   exports: [UsersService],
 })

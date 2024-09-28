@@ -15,7 +15,7 @@ const getConfig = (
 ) => {
   return {
     apiSettings: {
-      PORT: Number.parseInt(environmentVariables.PORT || '3000'),
+      PORT: Number.parseInt(environmentVariables.PORT ?? '3000'),
       ADMIN_LOGIN: environmentVariables.ADMIN_LOGIN,
       ADMIN_PASSWORD: environmentVariables.ADMIN_PASSWORD,
       JWT_SECRET: environmentVariables.JWT_SECRET,
