@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './features/users/users.module';
 import { BlogersModule } from './features/blogs/blogs.module';
 import { TestingModule } from './features/testing/testing.module';
+import { AuthModule } from './features/auth/auth.module';
 
 import configuration from './settings/configuration';
 
@@ -20,6 +21,10 @@ import configuration from './settings/configuration';
       isGlobal: true,
       load: [configuration],
     }),
+    UsersModule,
+    BlogersModule,
+    TestingModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],

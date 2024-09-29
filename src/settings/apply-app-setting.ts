@@ -14,7 +14,6 @@ export const applyAppSettings = (app: INestApplication) => {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   // setAppPrefix(app);
-
   setAppPipes(app);
 
   setAppExceptionsFilters(app);

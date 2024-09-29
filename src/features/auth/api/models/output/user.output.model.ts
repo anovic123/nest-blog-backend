@@ -10,10 +10,10 @@ export class UserOutputModel {
 export const UserOutputModelMapper = (user: UserDocument): UserOutputModel => {
   const outputModel = new UserOutputModel();
 
-  outputModel.id = user.id;
+  outputModel.id = user._id.toString();
   outputModel.login = user.accountData.login;
   outputModel.email = user.accountData.email;
-  outputModel.createdAt = user.createdAt.toISOString();
+  outputModel.createdAt = user.createdAt.toString();
 
   return outputModel;
 };

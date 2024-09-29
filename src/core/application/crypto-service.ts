@@ -8,10 +8,11 @@ export class CryptoService {
   async generateSalt() {
     return bcrypt.genSalt(10);
   }
-  async generateHash(password: string, salt: number) {
+  async generateHash(password: string) {
+    const salt = await bcrypt.genSalt(10);
     return bcrypt.hash(password, salt);
   }
-  async compareHash(password, passwordHash) {
+  async compareHash(password: string, passwordHash: string) {
     return bcrypt.compare(password, passwordHash);
   }
 }
