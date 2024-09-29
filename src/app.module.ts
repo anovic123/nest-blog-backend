@@ -16,7 +16,6 @@ import configuration from './settings/configuration';
     UsersModule,
     BlogersModule,
     TestingModule,
-    ConfigModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
