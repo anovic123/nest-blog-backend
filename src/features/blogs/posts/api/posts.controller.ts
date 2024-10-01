@@ -11,6 +11,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
 import { PostsService } from '../application/posts.service';
@@ -18,6 +19,7 @@ import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infra/posts-query-repository';
 
 import { PostInputModel } from '../dto';
+import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -26,6 +28,7 @@ export class PostsController {
     private readonly postQueryRepository: PostsQueryRepository,
   ) {}
 
+  @UseGuards(BasicAuthGuard)
   @Post()
   public async createPost(@Body() body: PostInputModel) {
     const newPost = await this.postsService.createPost(body);
@@ -59,8 +62,9 @@ export class PostsController {
     return post;
   }
 
+  @UseGuards(BasicAuthGuard)
   @Put('/:id')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   public async putPost(@Body() body: PostInputModel, @Param('id') id: string) {
     if (!id) {
       throw new NotFoundException(`Blog id is required`);
@@ -74,8 +78,9 @@ export class PostsController {
     return;
   }
 
+  @UseGuards(BasicAuthGuard)
   @Delete('/:id')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteUser(@Param('id') id: string) {
     if (!id) {
       throw new NotFoundException(`Blog id is required`);
