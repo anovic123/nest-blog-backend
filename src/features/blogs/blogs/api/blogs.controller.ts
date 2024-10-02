@@ -11,8 +11,10 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 
 import { BlogsQueryRepository } from '../infra/blogs-query.repository';
 
@@ -20,9 +22,8 @@ import { BlogsService } from '../application/blogs.service';
 
 import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
 
-import { BlogInputModel } from './models/blog.input.model';
-
-import { BlogPostInputModel } from '../dto';
+import { BlogInputModel } from './models/input/blog.input.model';
+import { BlogPostInputModel } from './models/input/blog-post.input.model';
 
 @Controller('blogs')
 export class BlogsController {

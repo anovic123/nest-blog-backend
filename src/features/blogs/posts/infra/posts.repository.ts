@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { LikePostStatus, PostInputModel, PostViewModel } from '../dto';
-import { BlogViewModel } from '../../blogs/dto';
+import { BlogViewModel } from '../../blogs/api/models/output';
 
 import { Post, PostDocument } from '../domain/post.schema';
 import { User } from 'src/features/users/domain/users.schema';

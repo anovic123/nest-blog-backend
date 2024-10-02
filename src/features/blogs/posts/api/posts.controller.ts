@@ -17,6 +17,7 @@ import { Request } from 'express';
 
 import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
 import { AuthGuard } from 'src/core/infrastructure/guards/auth.guard';
+import { RefreshTokenGuard } from 'src/core/infrastructure/guards/refresh-token.guard';
 
 import { PostsService } from '../application/posts.service';
 
@@ -27,7 +28,6 @@ import { IsPostExistPipe } from 'src/common/decorators/validate/is-post-exist.de
 import { LikePostInputModel } from './models/input/like-post.input.model';
 
 import { PostInputModel } from '../dto';
-import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('posts')
 export class PostsController {
@@ -67,22 +67,25 @@ export class PostsController {
     return newPost;
   }
 
-  @Public()
+  @UseGuards(RefreshTokenGuard)
   @Get()
   public async getPosts(
     @Query() query: { [key: string]: string | undefined },
-    @Req() request: Request,
+    @Req() request: any,
   ) {
-    const user = request['user'];
-    return this.postQueryRepository.getAllPosts(query);
+    return this.postQueryRepository.getAllPosts(query, request.userId);
   }
 
+  @UseGuards(RefreshTokenGuard)
   @Get('/:id')
-  public async getPostsById(@Param('id') id: string) {
+  public async getPostsById(@Param('id') id: string, @Req() request: any) {
     if (!id) {
       throw new NotFoundException(`Blog id is required`);
     }
-    const post = await this.postQueryRepository.findPostsAndMap(id);
+    const post = await this.postQueryRepository.findPostsAndMap(
+      id,
+      request.userId,
+    );
 
     if (!post) {
       throw new NotFoundException(`Blog with id ${id} not found`);

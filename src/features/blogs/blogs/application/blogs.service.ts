@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 
+import { BlogViewModel } from '../api/models/output';
+
 import { BlogsQueryRepository } from '../infra/blogs-query.repository';
 
 import { BlogsRepository } from '../infra/blogs.repository';
 
 import { BlogsDocument } from '../domain/blogs.schema';
 
-import { BlogInputModel } from '../api/models/blog.input.model';
-
-import { BlogPostInputModel, BlogViewModel } from '../dto';
+import { BlogInputModel } from '../api/models/input/blog.input.model';
+import { BlogPostInputModel } from '../api/models/input/blog-post.input.model';
 
 @Injectable()
 export class BlogsService {

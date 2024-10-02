@@ -1,17 +1,18 @@
 import { IsString, Length } from 'class-validator';
+
 import { Trim } from 'src/common/decorators';
 
-export class BlogInputModel {
+export class BlogPostInputModel {
   @IsString()
   @Trim()
-  @Length(1, 15)
-  name: string;
-  @IsString()
-  @Trim()
-  @Length(1, 500)
-  description: string;
+  @Length(1, 30)
+  title: string;
   @IsString()
   @Trim()
   @Length(1, 100)
-  websiteUrl: string;
+  shortDescription: string;
+  @IsString()
+  @Trim()
+  @Length(1, 1000)
+  content: string;
 }

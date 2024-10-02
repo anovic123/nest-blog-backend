@@ -5,10 +5,11 @@ import { Model, Types } from 'mongoose';
 import { Blog, BlogsDocument } from '../domain/blogs.schema';
 import { Post, PostDocument } from '../../posts/domain/post.schema';
 
-import { BlogInputModel } from '../api/models/blog.input.model';
+import { BlogInputModel } from '../api/models/input/blog.input.model';
 
-import { BlogPostInputModel, BlogPostViewModel, BlogViewModel } from '../dto';
 import { LikePostStatus } from '../../posts/dto';
+import { BlogPostViewModel, BlogViewModel } from '../api/models/output';
+import { BlogPostInputModel } from '../api/models/input/blog-post.input.model';
 
 @Injectable()
 export class BlogsRepository {

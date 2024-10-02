@@ -5,6 +5,8 @@ import { Model, Types } from 'mongoose';
 import { Blog, BlogsDocument } from '../domain/blogs.schema';
 import { Post, PostDocument } from '../../posts/domain/post.schema';
 
+import { BlogPostViewModel, BlogViewModel } from '../api/models/output';
+
 import {
   getAllBlogsHelper,
   GetAllBlogsHelperResult,
@@ -12,9 +14,8 @@ import {
   GetBlogPostsHelperResult,
 } from '../helper';
 
-import { BlogPostViewModel, BlogViewModel } from '../dto';
-
 import { PaginatedResponse } from '../../../../base/types/pagination';
+
 import { LikePostStatus, PostViewModel } from '../../posts/dto';
 
 @Injectable()
