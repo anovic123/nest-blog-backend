@@ -7,6 +7,7 @@ import {
   Comments,
   CommentsDocument,
 } from '../../comments/domain/comments.schema';
+import { LikePost, LikePostDocument } from '../domain/post-like.schema';
 
 import { getAllPostsHelper, GetAllPostsHelperResult } from '../helper';
 
@@ -14,16 +15,19 @@ import { LikePostStatus, PostViewModel } from '../dto';
 import { CommentDBType } from './../../comments/dto';
 
 import { PaginatedResponse } from '../../../../base/types/pagination';
+import { User } from 'src/features/users/domain/users.schema';
 
 @Injectable()
 export class PostsQueryRepository {
   constructor(
     @InjectModel(Post.name) private PostModel: Model<PostDocument>,
     @InjectModel(Comments.name) private CommentsModel: Model<CommentsDocument>,
+    @InjectModel(LikePost.name) private LikePostModel: Model<LikePostDocument>,
   ) {}
 
   public async getAllPosts(
     query: GetAllPostsHelperResult,
+    userId?: string | null | undefined,
   ): Promise<PaginatedResponse<PostViewModel>> {
     const sanitizedQuery = getAllPostsHelper(query);
 
@@ -48,7 +52,7 @@ export class PostsQueryRepository {
       const totalCount = await this.PostModel.countDocuments(filter);
 
       const mappedItems = await Promise.all(
-        items.map((i: any) => this.mapPostOutput(i)),
+        items.map((i: any) => this.mapPostOutput(i, userId)),
       );
 
       return {
@@ -72,6 +76,7 @@ export class PostsQueryRepository {
 
   public async findPostsAndMap(
     id: PostViewModel['id'],
+    userId?: string,
   ): Promise<PostViewModel | null> {
     try {
       const findedPost = (await this.PostModel.findOne({
@@ -82,7 +87,7 @@ export class PostsQueryRepository {
         return null;
       }
 
-      const mappedPost = await this.mapPostOutput(findedPost);
+      const mappedPost = await this.mapPostOutput(findedPost, userId);
 
       return mappedPost;
     } catch (error) {
@@ -91,7 +96,35 @@ export class PostsQueryRepository {
     }
   }
 
-  public async mapPostOutput(post: PostDocument): Promise<PostViewModel> {
+  public async mapPostOutput(
+    post: PostDocument,
+    userId?: string | null | undefined,
+  ): Promise<PostViewModel> {
+    const likes = await this.LikePostModel.find({
+      postId: new Types.ObjectId(post._id).toString(),
+    });
+
+    const userLike = userId ? likes.find((l) => l.authorId === userId) : null;
+
+    const likesCount =
+      likes.filter((l) => l.status === LikePostStatus.LIKE).length ?? 0;
+    const dislikesCount =
+      likes.filter((l) => l.status === LikePostStatus.DISLIKE).length ?? 0;
+    const myStatus = userLike?.status ?? LikePostStatus.NONE;
+
+    const newestLikes = likes
+      .filter((l) => l.status === LikePostStatus.LIKE)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      .slice(0, 3)
+      .map((l) => ({
+        addedAt: l.createdAt,
+        userId: l.authorId,
+        login: l.login,
+      }));
+
     const postForOutput: PostViewModel = {
       id: post._id.toString(),
       title: post.title,
@@ -101,10 +134,10 @@ export class PostsQueryRepository {
       blogName: post.blogName,
       createdAt: post.createdAt,
       extendedLikesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: LikePostStatus.NONE,
-        newestLikes: [],
+        likesCount,
+        dislikesCount,
+        myStatus,
+        newestLikes: newestLikes.length > 0 ? newestLikes : [],
       },
     };
 

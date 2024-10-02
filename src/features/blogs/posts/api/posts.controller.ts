@@ -4,20 +4,30 @@ import {
   Delete,
   Get,
   HttpCode,
-  HttpException,
   HttpStatus,
   NotFoundException,
   Param,
   Post,
   Put,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
+
+import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
+import { AuthGuard } from 'src/core/infrastructure/guards/auth.guard';
 
 import { PostsService } from '../application/posts.service';
 
 import { PostsQueryRepository } from '../infra/posts-query-repository';
 
+import { IsPostExistPipe } from 'src/common/decorators/validate/is-post-exist.decorator';
+
+import { LikePostInputModel } from './models/input/like-post.input.model';
+
 import { PostInputModel } from '../dto';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('posts')
 export class PostsController {
@@ -26,22 +36,44 @@ export class PostsController {
     private readonly postQueryRepository: PostsQueryRepository,
   ) {}
 
+  // like posts
+  @UseGuards(AuthGuard)
+  @Put('/:postId/like-status')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async likePost(
+    @Param('postId', IsPostExistPipe) postId: string,
+    @Body() body: LikePostInputModel,
+    @Req() request: Request,
+  ) {
+    const user = request['user'];
+    const post = await this.postQueryRepository.findPostsAndMap(
+      postId,
+      user.userId,
+    );
+    return this.postsService.postLike(
+      postId,
+      post?.extendedLikesInfo.myStatus,
+      body.likeStatus,
+      user.userId,
+    );
+  }
+
+  // create new post
+  @UseGuards(BasicAuthGuard)
   @Post()
   public async createPost(@Body() body: PostInputModel) {
     const newPost = await this.postsService.createPost(body);
 
-    if (!newPost) {
-      throw new HttpException(
-        'Error while creating post',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     return newPost;
   }
 
+  @Public()
   @Get()
-  public async getPosts(@Query() query: { [key: string]: string | undefined }) {
+  public async getPosts(
+    @Query() query: { [key: string]: string | undefined },
+    @Req() request: Request,
+  ) {
+    const user = request['user'];
     return this.postQueryRepository.getAllPosts(query);
   }
 
@@ -59,8 +91,9 @@ export class PostsController {
     return post;
   }
 
+  @UseGuards(BasicAuthGuard)
   @Put('/:id')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   public async putPost(@Body() body: PostInputModel, @Param('id') id: string) {
     if (!id) {
       throw new NotFoundException(`Blog id is required`);
@@ -74,8 +107,9 @@ export class PostsController {
     return;
   }
 
+  @UseGuards(BasicAuthGuard)
   @Delete('/:id')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteUser(@Param('id') id: string) {
     if (!id) {
       throw new NotFoundException(`Blog id is required`);

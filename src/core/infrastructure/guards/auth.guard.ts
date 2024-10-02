@@ -26,20 +26,38 @@ export class AuthGuard implements CanActivate {
     private reflector: Reflector,
     private configService: ConfigService<ConfigurationType, true>,
   ) {}
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
+
+    const request = context.switchToHttp().getRequest<Request>();
+    const token = this.extractTokenFromHeader(request);
+
     if (isPublic) {
+      if (token) {
+        try {
+          const apiSettings = this.configService.get('apiSettings', {
+            infer: true,
+          });
+
+          const payload = await this.jwtService.verifyAsync(token, {
+            secret: apiSettings.JWT_SECRET,
+          });
+          request['user'] = payload as JwtPayload;
+        } catch {
+          return true;
+        }
+      }
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Token is missing');
     }
+
     try {
       const apiSettings = this.configService.get('apiSettings', {
         infer: true,
@@ -50,8 +68,9 @@ export class AuthGuard implements CanActivate {
       });
       request['user'] = payload as JwtPayload;
     } catch {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Invalid token');
     }
+
     return true;
   }
 

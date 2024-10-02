@@ -13,10 +13,13 @@ import { PostsRepository } from './posts/infra/posts.repository';
 import { BlogsQueryRepository } from './blogs/infra/blogs-query.repository';
 import { CommentsQueryRepository } from './comments/infra/comments-query.repository';
 import { PostsQueryRepository } from './posts/infra/posts-query-repository';
+import { UsersRepository } from '../users/infra/users.repository';
 
 import { Blog, blogSchema } from './blogs/domain/blogs.schema';
 import { Post, postSchema } from './posts/domain/post.schema';
 import { Comments, commentsSchema } from './comments/domain/comments.schema';
+import { User, userSchema } from '../users/domain/users.schema';
+import { LikePost, postLikeSchema } from './posts/domain/post-like.schema';
 
 @Module({
   imports: [
@@ -38,6 +41,18 @@ import { Comments, commentsSchema } from './comments/domain/comments.schema';
         schema: commentsSchema,
       },
     ]),
+    MongooseModule.forFeature([
+      {
+        name: User.name,
+        schema: userSchema,
+      },
+    ]),
+    MongooseModule.forFeature([
+      {
+        name: LikePost.name,
+        schema: postLikeSchema,
+      },
+    ]),
   ],
   controllers: [BlogsController, PostsController, CommentsController],
   providers: [
@@ -48,6 +63,7 @@ import { Comments, commentsSchema } from './comments/domain/comments.schema';
     PostsRepository,
     PostsQueryRepository,
     CommentsQueryRepository,
+    UsersRepository,
   ],
 })
 export class BlogersModule {}
