@@ -8,6 +8,10 @@ import {
 } from '../../blogs/comments/domain/comments.schema';
 import { Post, PostDocument } from '../../blogs/posts/domain/post.schema';
 import { User, UserDocument } from '../../users/domain/users.schema';
+import {
+  LikePost,
+  LikePostDocument,
+} from 'src/features/blogs/posts/domain/post-like.schema';
 
 @Injectable()
 export class TestingRepository {
@@ -16,6 +20,7 @@ export class TestingRepository {
     @InjectModel(Post.name) private PostModel: Model<PostDocument>,
     @InjectModel(Comments.name) private CommentsModel: Model<CommentsDocument>,
     @InjectModel(User.name) private UserModel: Model<UserDocument>,
+    @InjectModel(LikePost.name) private LikePostModel: Model<LikePostDocument>,
   ) {}
 
   public async deleteAll(): Promise<boolean> {
@@ -25,6 +30,7 @@ export class TestingRepository {
         this.PostModel.deleteMany({}),
         this.CommentsModel.deleteMany({}),
         this.UserModel.deleteMany({}),
+        this.LikePostModel.deleteMany({}),
       ]);
 
       return true;

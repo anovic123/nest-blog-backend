@@ -18,8 +18,11 @@ import { BlogsQueryRepository } from '../infra/blogs-query.repository';
 
 import { BlogsService } from '../application/blogs.service';
 
-import { BlogInputModel, BlogPostInputModel } from '../dto';
 import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
+
+import { BlogInputModel } from './models/blog.input.model';
+
+import { BlogPostInputModel } from '../dto';
 
 @Controller('blogs')
 export class BlogsController {
@@ -30,8 +33,8 @@ export class BlogsController {
 
   @UseGuards(BasicAuthGuard)
   @Post()
-  public async createBlog(@Body() body: BlogInputModel) {
-    const newBlog = this.blogsService.createBlog(body);
+  public async createBlog(@Body() createBlogModel: BlogInputModel) {
+    const newBlog = this.blogsService.createBlog(createBlogModel);
 
     if (!newBlog) {
       throw new HttpException(

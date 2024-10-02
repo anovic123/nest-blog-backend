@@ -7,7 +7,9 @@ import { BlogsRepository } from '../infra/blogs.repository';
 
 import { BlogsDocument } from '../domain/blogs.schema';
 
-import { BlogInputModel, BlogPostInputModel, BlogViewModel } from '../dto';
+import { BlogInputModel } from '../api/models/blog.input.model';
+
+import { BlogPostInputModel, BlogViewModel } from '../dto';
 
 @Injectable()
 export class BlogsService {

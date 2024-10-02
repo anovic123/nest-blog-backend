@@ -24,7 +24,7 @@ import {
     JwtModule.register({
       global: true,
       secret: 'qwqweqeqe123',
-      signOptions: { expiresIn: '60s' },
+      signOptions: { expiresIn: '500s' },
     }),
     MongooseModule.forFeature([
       {

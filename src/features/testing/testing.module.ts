@@ -8,6 +8,10 @@ import {
   commentsSchema,
 } from '../blogs/comments/domain/comments.schema';
 import { User, userSchema } from '../users/domain/users.schema';
+import {
+  LikePost,
+  postLikeSchema,
+} from '../blogs/posts/domain/post-like.schema';
 
 import { TestingService } from './application/testing.service';
 
@@ -39,6 +43,12 @@ import { TestingController } from './api/testing.controller';
       {
         name: User.name,
         schema: userSchema,
+      },
+    ]),
+    MongooseModule.forFeature([
+      {
+        name: LikePost.name,
+        schema: postLikeSchema,
       },
     ]),
   ],
