@@ -5,7 +5,10 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { useContainer } from 'class-validator';
+import cookieParser from 'cookie-parser';
+
 import { AppModule } from 'src/app.module';
+
 import { HttpExceptionFilter } from 'src/common/exception-filters/http-exception-filter';
 
 // const APP_PREFIX = '/api'
@@ -17,6 +20,8 @@ export const applyAppSettings = (app: INestApplication) => {
   setAppPipes(app);
 
   setAppExceptionsFilters(app);
+
+  app.use(cookieParser());
 };
 
 // const setAppPrefix = (app: INestApplication) => {

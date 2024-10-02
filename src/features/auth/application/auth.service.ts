@@ -175,6 +175,7 @@ export class AuthService {
     password: string,
   ): Promise<{
     accessToken: string;
+    refreshToken: string;
   }> {
     const user =
       await this.usersQueryRepository.findUserByLoginOrEmail(loginOrEmail);
@@ -194,11 +195,16 @@ export class AuthService {
 
     const userId = user._id.toString();
 
-    const userAccessToken = {
-      accessToken: this.jwtService.sign({ userId }),
-    };
+    const accessToken = this.jwtService.sign({ userId });
 
-    return userAccessToken;
+    const refreshToken = this.jwtService.sign({
+      userId,
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   public async getMeInfo(id: User['_id']): Promise<{

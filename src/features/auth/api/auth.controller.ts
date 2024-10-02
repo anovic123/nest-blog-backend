@@ -6,9 +6,10 @@ import {
   HttpStatus,
   Post,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 import { AuthService } from '../application/auth.service';
 
@@ -26,14 +27,20 @@ export class AuthController {
 
   @Post('/login')
   @HttpCode(HttpStatus.OK)
-  public async loginUser(@Body() bodyLoginEmail: BodyLoginModel) {
+  public async loginUser(
+    @Body() bodyLoginEmail: BodyLoginModel,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const { loginOrEmail, password } = bodyLoginEmail;
-    const loginUserRes = await this.authService.checkCredentials(
-      loginOrEmail,
-      password,
-    );
+    const { accessToken, refreshToken } =
+      await this.authService.checkCredentials(loginOrEmail, password);
 
-    return loginUserRes;
+    res
+      .cookie('refreshToken', refreshToken, { httpOnly: true, secure: true })
+      .header('Authorization', accessToken)
+      .send({ accessToken });
+
+    return { accessToken };
   }
 
   @Post('/password-recovery')
