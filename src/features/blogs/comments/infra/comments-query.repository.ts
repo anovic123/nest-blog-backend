@@ -4,7 +4,11 @@ import { Model } from 'mongoose';
 
 import { Comments, CommentsDocument } from '../domain/comments.schema';
 
-import { CommentDBType, CommentViewModel, LikeCommentStatus } from '../dto';
+import {
+  CommentDBType,
+  CommentViewModel,
+  LikeCommentStatus,
+} from '../api/models/output';
 
 @Injectable()
 export class CommentsQueryRepository {

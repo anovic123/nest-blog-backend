@@ -6,16 +6,20 @@ import { Blog, BlogsDocument } from '../domain/blogs.schema';
 import { Post, PostDocument } from '../../posts/domain/post.schema';
 
 import {
+  BlogPostViewModel,
+  BlogViewModel,
+  LikePostStatus,
+} from '../api/models/output';
+
+import {
   getAllBlogsHelper,
   GetAllBlogsHelperResult,
   getBlogPostsHelper,
   GetBlogPostsHelperResult,
 } from '../helper';
 
-import { BlogPostViewModel, BlogViewModel } from '../dto';
-
 import { PaginatedResponse } from '../../../../base/types/pagination';
-import { LikePostStatus, PostViewModel } from '../../posts/dto';
+import { PostViewModel } from '../../posts/api/models/output';
 
 @Injectable()
 export class BlogsQueryRepository {

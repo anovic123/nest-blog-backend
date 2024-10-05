@@ -1,5 +1,10 @@
 import { IsEmail, IsString, Length } from 'class-validator';
-import { EmailIsExist, LoginIsExist, Trim } from 'src/common/decorators';
+
+import {
+  EmailIsExist,
+  LoginIsExist,
+  Trim,
+} from '../../../../../core/decorators';
 
 export class UserCreateModel {
   @IsString()

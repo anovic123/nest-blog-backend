@@ -5,13 +5,14 @@ import { Model, Types } from 'mongoose';
 import { Blog, BlogsDocument } from '../domain/blogs.schema';
 import { Post, PostDocument } from '../../posts/domain/post.schema';
 
+import { BlogInputModel } from '../api/models/input/blog.input.model';
+
 import {
-  BlogInputModel,
-  BlogPostInputModel,
   BlogPostViewModel,
   BlogViewModel,
-} from '../dto';
-import { LikePostStatus } from '../../posts/dto';
+  LikePostStatus,
+} from '../api/models/output';
+import { BlogPostInputModel } from '../api/models/input/blog-post.input.model';
 
 @Injectable()
 export class BlogsRepository {
@@ -96,30 +97,22 @@ export class BlogsRepository {
   public async createPostBlog(
     blogId: BlogViewModel['id'],
     post: BlogPostInputModel,
-  ): Promise<BlogPostViewModel | null> {
-    try {
-      const blog = await this.findBlog(blogId);
-      if (!blog) {
-        return null;
-      }
+  ): Promise<BlogPostViewModel> {
+    const blog = await this.findBlog(blogId);
 
-      const newPost = {
-        _id: new Types.ObjectId(),
-        title: post.title,
-        shortDescription: post.shortDescription,
-        content: post.content,
-        blogId: blog.id,
-        blogName: blog.name,
-        createdAt: new Date().toISOString(),
-      } as PostDocument;
+    const newPost = {
+      _id: new Types.ObjectId(),
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      blogId: blog!.id,
+      blogName: blog!.name,
+      createdAt: new Date().toISOString(),
+    } as PostDocument;
 
-      await this.PostModel.create(newPost);
+    await this.PostModel.create(newPost);
 
-      return this.mapNewPostBlog(newPost);
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
+    return this.mapNewPostBlog(newPost);
   }
   public mapNewPostBlog(post: PostDocument): BlogPostViewModel {
     return {
