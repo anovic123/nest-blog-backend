@@ -17,6 +17,6 @@ export class IsPostExistPipe implements PipeTransform {
       throw new NotFoundException(`Post with ID ${value} does not exist`);
     }
 
-    return value;
+    return true;
   }
 }

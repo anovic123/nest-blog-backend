@@ -6,10 +6,11 @@ import { BlogsRepository } from '../../blogs/infra/blogs.repository';
 import { UsersRepository } from 'src/features/users/infra/users.repository';
 
 import { PostDocument } from '../domain/post.schema';
-
-import { PostInputModel, PostViewModel } from '../dto';
 import { User } from 'src/features/users/domain/users.schema';
 import { LikePostStatus } from '../domain/post-like.schema';
+
+import { PostInputModel } from '../api/models/input/create-post.input.model';
+import { PostViewModel } from '../api/models/output';
 
 @Injectable()
 export class PostsService {

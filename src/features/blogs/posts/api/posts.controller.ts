@@ -26,8 +26,7 @@ import { PostsQueryRepository } from '../infra/posts-query-repository';
 import { IsPostExistPipe } from 'src/common/decorators/validate/is-post-exist.decorator';
 
 import { LikePostInputModel } from './models/input/like-post.input.model';
-
-import { PostInputModel } from '../dto';
+import { PostInputModel } from './models/input/create-post.input.model';
 
 @Controller('posts')
 export class PostsController {

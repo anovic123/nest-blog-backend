@@ -7,8 +7,11 @@ import { Post, PostDocument } from '../../posts/domain/post.schema';
 
 import { BlogInputModel } from '../api/models/input/blog.input.model';
 
-import { LikePostStatus } from '../../posts/dto';
-import { BlogPostViewModel, BlogViewModel } from '../api/models/output';
+import {
+  BlogPostViewModel,
+  BlogViewModel,
+  LikePostStatus,
+} from '../api/models/output';
 import { BlogPostInputModel } from '../api/models/input/blog-post.input.model';
 
 @Injectable()

@@ -2,12 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { LikePostStatus, PostInputModel, PostViewModel } from '../dto';
 import { BlogViewModel } from '../../blogs/api/models/output';
 
 import { Post, PostDocument } from '../domain/post.schema';
 import { User } from 'src/features/users/domain/users.schema';
-import { LikePost, LikePostDocument } from '../domain/post-like.schema';
+import {
+  LikePost,
+  LikePostDocument,
+  LikePostStatus,
+} from '../domain/post-like.schema';
+
+import { PostInputModel } from '../api/models/input/create-post.input.model';
+import { PostViewModel } from '../api/models/output';
 
 @Injectable()
 export class PostsRepository {

@@ -39,8 +39,6 @@ export class AuthController {
       .cookie('refreshToken', refreshToken, { httpOnly: true, secure: true })
       .header('Authorization', accessToken)
       .send({ accessToken });
-
-    return { accessToken };
   }
 
   @Post('/password-recovery')

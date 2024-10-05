@@ -20,6 +20,8 @@ import { Post, postSchema } from './posts/domain/post.schema';
 import { Comments, commentsSchema } from './comments/domain/comments.schema';
 import { User, userSchema } from '../users/domain/users.schema';
 import { LikePost, postLikeSchema } from './posts/domain/post-like.schema';
+import { CommentsService } from './comments/application/comments.service';
+import { CommentsRepository } from './comments/infra/comments.repository';
 
 @Module({
   imports: [
@@ -64,6 +66,8 @@ import { LikePost, postLikeSchema } from './posts/domain/post-like.schema';
     PostsQueryRepository,
     CommentsQueryRepository,
     UsersRepository,
+    CommentsService,
+    CommentsRepository,
   ],
 })
 export class BlogersModule {}

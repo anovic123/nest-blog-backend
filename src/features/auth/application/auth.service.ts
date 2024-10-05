@@ -78,10 +78,8 @@ export class AuthService {
     const user = await this.usersQueryRepository.findUserByConfirmationCode(
       confirmationCode.code,
     );
-    if (!user) {
-      throw new HttpException('code is wrong', HttpStatus.BAD_REQUEST);
-    }
     if (
+      !user ||
       user.emailConfirmation.isConfirmed ||
       user.emailConfirmation.confirmationCode !== confirmationCode.code ||
       user.emailConfirmation.expirationDate < new Date()
@@ -91,7 +89,7 @@ export class AuthService {
     const res = await this.usersRepository.updateConfirmation(user._id);
 
     if (!res) {
-      throw new HttpException('code is wrong', HttpStatus.BAD_REQUEST);
+      throw new HttpException('oops', HttpStatus.BAD_REQUEST);
     }
   }
 

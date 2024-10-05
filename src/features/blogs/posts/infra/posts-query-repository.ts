@@ -7,15 +7,17 @@ import {
   Comments,
   CommentsDocument,
 } from '../../comments/domain/comments.schema';
-import { LikePost, LikePostDocument } from '../domain/post-like.schema';
+import {
+  LikePost,
+  LikePostDocument,
+  LikePostStatus,
+} from '../domain/post-like.schema';
 
 import { getAllPostsHelper, GetAllPostsHelperResult } from '../helper';
 
-import { LikePostStatus, PostViewModel } from '../dto';
-import { CommentDBType } from './../../comments/dto';
-
 import { PaginatedResponse } from '../../../../base/types/pagination';
-import { User } from 'src/features/users/domain/users.schema';
+import { PostViewModel } from '../api/models/output';
+import { CommentDBType } from '../../comments/api/models/output';
 
 @Injectable()
 export class PostsQueryRepository {
