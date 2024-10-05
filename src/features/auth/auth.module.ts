@@ -1,44 +1,52 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CqrsModule } from '@nestjs/cqrs';
 
 import { AuthController } from './api/auth.controller';
 
 import { AuthService } from './application/auth.service';
 
-import { CryptoService } from 'src/core/application/crypto-service';
-
 import { AuthRepository } from './infra/auth-repository';
-import { User, userSchema } from '../users/domain/users.schema';
-import { EmailsManager } from 'src/core/managers/email.manager';
-import { EmailModule } from 'src/core/email.module';
 import { UsersQueryRepository } from '../users/infra/users-query.repository';
 import { UsersRepository } from '../users/infra/users.repository';
+
 import {
   EmailIsExistConstraint,
   LoginIsExistConstraint,
-} from 'src/common/decorators';
+} from 'src/core/decorators';
+
+import { AdaptersModule } from 'src/core/adapters/adapters.module';
+
+import { User, userSchema } from '../users/domain/users.schema';
+
+import { GetUserInfoHandler } from './application/use-cases/user-info.query.use-case';
+import { ResendCodeCommandUseCase } from './application/use-cases/resend-code.use-case';
+import { CreateUserUseCase } from './application/use-cases/create-user.use-case';
+import { ConfirmEmailUseCase } from './application/use-cases/confirm-email.use-case';
+import { NewPasswordUseCase } from './application/use-cases/new-password.use-case';
+import { PasswordRecoveryUseCase } from './application/use-cases/password-recovery.use-case';
 
 @Module({
   imports: [
-    JwtModule.register({
-      global: true,
-      secret: 'qwqweqeqe123',
-      signOptions: { expiresIn: '500s' },
-    }),
+    AdaptersModule,
+    CqrsModule,
     MongooseModule.forFeature([
       {
         name: User.name,
         schema: userSchema,
       },
     ]),
-    EmailModule,
   ],
   providers: [
+    ResendCodeCommandUseCase,
+    CreateUserUseCase,
+    ConfirmEmailUseCase,
+    NewPasswordUseCase,
+    PasswordRecoveryUseCase,
+    GetUserInfoHandler,
+
     AuthService,
     AuthRepository,
-    CryptoService,
-    EmailsManager,
     UsersQueryRepository,
     EmailIsExistConstraint,
     LoginIsExistConstraint,

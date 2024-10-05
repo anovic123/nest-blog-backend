@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 
-import { AuthGuard } from 'src/core/infrastructure/guards/auth.guard';
+import { AuthGuard } from 'src/core/guards/auth.guard';
 
 import { CommentsQueryRepository } from '../infra/comments-query.repository';
 

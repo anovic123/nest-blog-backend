@@ -4,47 +4,41 @@ import {
   Delete,
   Get,
   HttpCode,
-  HttpException,
   HttpStatus,
   NotFoundException,
   Param,
   Post,
   Put,
   Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { CommandBus } from '@nestjs/cqrs';
 
 import { BlogsQueryRepository } from '../infra/blogs-query.repository';
 
 import { BlogsService } from '../application/blogs.service';
 
-import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
+import { BasicAuthGuard } from 'src/core/guards/auth-basic.guard';
 
 import { BlogInputModel } from './models/input/blog.input.model';
 import { BlogPostInputModel } from './models/input/blog-post.input.model';
+import { CreateBlogCommand } from '../application/use-cases/create-blog.use-case';
+import { UpdateBlogCommand } from '../application/use-cases/update-blog.use-case';
+import { DeleteBlogCommand } from '../application/use-cases/delete-blog.use-case';
+import { CreatePostBlogCommand } from '../application/use-cases/create-post-blog.use-case';
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
     private readonly blogsService: BlogsService,
     private readonly blogsQueryRepository: BlogsQueryRepository,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @UseGuards(BasicAuthGuard)
   @Post()
   public async createBlog(@Body() createBlogModel: BlogInputModel) {
-    const newBlog = this.blogsService.createBlog(createBlogModel);
-
-    if (!newBlog) {
-      throw new HttpException(
-        'Error while creating blog',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    return newBlog;
+    return this.commandBus.execute(new CreateBlogCommand(createBlogModel));
   }
 
   @Get()
@@ -67,26 +61,14 @@ export class BlogsController {
   @Put('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   public async putBlogs(@Body() body: BlogInputModel, @Param('id') id: string) {
-    const updatedBlog = await this.blogsService.updateBlog(body, id);
-
-    if (!updatedBlog) {
-      throw new NotFoundException(`Blog with id ${id} not found`);
-    }
-
-    return updatedBlog;
+    return this.commandBus.execute(new UpdateBlogCommand(body, id));
   }
 
   @UseGuards(BasicAuthGuard)
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteUser(@Param('id') id: string) {
-    const result = await this.blogsService.deleteBlog(id);
-
-    if (!result) {
-      throw new NotFoundException(`Blog with id ${id} not found`);
-    }
-
-    return;
+    return this.commandBus.execute(new DeleteBlogCommand(id));
   }
 
   @Get('/:blogId/posts')
@@ -112,12 +94,6 @@ export class BlogsController {
     @Param('blogId') blogId: string,
     @Body() body: BlogPostInputModel,
   ) {
-    const newBlogPost = await this.blogsService.createPostBlog(blogId, body);
-
-    if (!newBlogPost) {
-      throw new NotFoundException(`Blog with id ${blogId} not found`);
-    }
-
-    return newBlogPost;
+    return this.commandBus.execute(new CreatePostBlogCommand(blogId, body));
   }
 }

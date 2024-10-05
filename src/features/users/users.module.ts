@@ -1,8 +1,9 @@
 import { MongooseModule } from '@nestjs/mongoose';
 import { Module } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
 
 import { UsersService } from './application/users.service';
-import { CryptoService } from 'src/core/application/crypto-service';
+import { CryptoService } from 'src/core/adapters/crypto-service';
 
 import { UsersController } from './api/users.controller';
 
@@ -10,14 +11,16 @@ import { UsersRepository } from './infra/users.repository';
 import { UsersQueryRepository } from './infra/users-query.repository';
 
 import { User, userSchema } from './domain/users.schema';
-import {
-  EmailIsExistConstraint,
-  LoginIsExistConstraint,
-} from 'src/common/decorators';
 
 import { AuthService } from '../auth/application/auth.service';
 import { AuthRepository } from '../auth/infra/auth-repository';
-import { EmailModule } from 'src/core/email.module';
+
+import {
+  EmailIsExistConstraint,
+  LoginIsExistConstraint,
+} from '../../core/decorators';
+import { AdaptersModule } from '../../core/adapters/adapters.module';
+import { DeleteUserUseCase } from './application/use-cases/delete-user.use-case';
 
 @Module({
   imports: [
@@ -27,17 +30,18 @@ import { EmailModule } from 'src/core/email.module';
         schema: userSchema,
       },
     ]),
+    CqrsModule,
     UsersModule,
-    EmailModule,
+    AdaptersModule,
   ],
   controllers: [UsersController],
   providers: [
-    UsersService,
+    DeleteUserUseCase,
     UsersRepository,
     UsersQueryRepository,
-    CryptoService,
     EmailIsExistConstraint,
     LoginIsExistConstraint,
+    UsersService,
     AuthRepository,
     AuthService,
   ],

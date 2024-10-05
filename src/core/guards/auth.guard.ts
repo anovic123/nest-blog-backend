@@ -36,15 +36,15 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractTokenFromHeader(request);
 
+    const jwtSettings = this.configService.get('jwtSettings', {
+      infer: true,
+    });
+
     if (isPublic) {
       if (token) {
         try {
-          const apiSettings = this.configService.get('apiSettings', {
-            infer: true,
-          });
-
           const payload = await this.jwtService.verifyAsync(token, {
-            secret: apiSettings.JWT_SECRET,
+            secret: jwtSettings.JWT_SECRET,
           });
           request['user'] = payload as JwtPayload;
         } catch {
@@ -59,12 +59,8 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const apiSettings = this.configService.get('apiSettings', {
-        infer: true,
-      });
-
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: apiSettings.JWT_SECRET,
+        secret: jwtSettings.JWT_SECRET,
       });
       request['user'] = payload as JwtPayload;
     } catch {

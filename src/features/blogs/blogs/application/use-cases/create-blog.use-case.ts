@@ -1,4 +1,4 @@
-import { ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Types } from 'mongoose';
 
 import { BlogInputModel } from '../../api/models/input/blog.input.model';
@@ -13,6 +13,7 @@ export class CreateBlogCommand {
   constructor(public readonly body: BlogInputModel) {}
 }
 
+@CommandHandler(CreateBlogCommand)
 export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
   constructor(private readonly blogsRepository: BlogsRepository) {}
 

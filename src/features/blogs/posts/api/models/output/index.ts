@@ -4,7 +4,7 @@ export enum LikePostStatus {
   DISLIKE = 'Dislike',
 }
 
-export type PostViewModel = {
+export class PostViewModel {
   id: string;
   title: string; // max 30
   shortDescription: string; // max 100
@@ -13,9 +13,9 @@ export type PostViewModel = {
   blogName: string;
   createdAt: string;
   extendedLikesInfo: PostLikesViewModel;
-};
+}
 
-export type PostLikesViewModel = {
+export class PostLikesViewModel {
   likesCount: number;
   dislikesCount: number;
   myStatus: LikePostStatus;
@@ -24,4 +24,4 @@ export type PostLikesViewModel = {
     userId: string;
     login: string;
   }[];
-};
+}

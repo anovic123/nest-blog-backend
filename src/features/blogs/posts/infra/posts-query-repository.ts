@@ -15,9 +15,9 @@ import {
 
 import { getAllPostsHelper, GetAllPostsHelperResult } from '../helper';
 
-import { PaginatedResponse } from '../../../../base/types/pagination';
 import { PostViewModel } from '../api/models/output';
 import { CommentDBType } from '../../comments/api/models/output';
+import { PaginatedResponse } from '../../../../base/types/pagination';
 
 @Injectable()
 export class PostsQueryRepository {

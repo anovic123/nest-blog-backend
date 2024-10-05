@@ -1,7 +1,7 @@
-export type CommentOutputCommentatorInfoModel = {
+export class CommentOutputCommentatorInfoModel {
   userId: string;
   userLogin: string;
-};
+}
 
 export enum LikeCommentStatus {
   NONE = 'None',
@@ -9,7 +9,7 @@ export enum LikeCommentStatus {
   DISLIKE = 'Dislike',
 }
 
-export interface CommentViewModel {
+export class CommentViewModel {
   id: string;
   content: string;
   commentatorInfo: CommentOutputCommentatorInfoModel;
@@ -17,16 +17,16 @@ export interface CommentViewModel {
   likesInfo: CommentLikesViewModel;
 }
 
-export interface CommentLikesViewModel {
+export class CommentLikesViewModel {
   likesCount: number;
   dislikesCount: number;
   myStatus: LikeCommentStatus;
 }
 
-export type CommentDBType = {
+export class CommentDBType {
   id: string;
   content: string;
   commentatorInfo: CommentOutputCommentatorInfoModel;
   createdAt: string;
   postId?: string;
-};
+}

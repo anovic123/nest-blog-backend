@@ -4,7 +4,7 @@ export enum LikePostStatus {
   DISLIKE = 'Dislike',
 }
 
-export type PostLikesViewModel = {
+export class PostLikesViewModel {
   likesCount: number;
   dislikesCount: number;
   myStatus: LikePostStatus;
@@ -13,9 +13,9 @@ export type PostLikesViewModel = {
     userId: string;
     login: string;
   }[];
-};
+}
 
-export type BlogPostViewModel = {
+export class BlogPostViewModel {
   id: string;
   title: string;
   shortDescription: string;
@@ -24,13 +24,13 @@ export type BlogPostViewModel = {
   blogName: string;
   createdAt: string;
   extendedLikesInfo: PostLikesViewModel;
-};
+}
 
-export type BlogViewModel = {
+export class BlogViewModel {
   id: string;
   name: string;
   description: string;
   websiteUrl: string;
   createdAt: string;
   isMembership: boolean;
-};
+}

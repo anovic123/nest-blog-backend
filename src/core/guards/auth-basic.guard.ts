@@ -31,9 +31,11 @@ export class BasicAuthGuard implements CanActivate {
 
     const base64Credentials = authHeader.slice(6).trim();
 
-    const apiSettings = this.configService.get('apiSettings', { infer: true });
+    const basicSettings = this.configService.get('basicSettings', {
+      infer: true,
+    });
     const validBase64Credentials = fromUTF8ToBase64(
-      `${apiSettings.ADMIN_LOGIN}:${apiSettings.ADMIN_PASSWORD}`,
+      `${basicSettings.ADMIN_LOGIN}:${basicSettings.ADMIN_PASSWORD}`,
     );
     if (base64Credentials !== validBase64Credentials) {
       throw new UnauthorizedException();

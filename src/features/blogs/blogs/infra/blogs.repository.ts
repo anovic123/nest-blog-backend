@@ -97,30 +97,22 @@ export class BlogsRepository {
   public async createPostBlog(
     blogId: BlogViewModel['id'],
     post: BlogPostInputModel,
-  ): Promise<BlogPostViewModel | null> {
-    try {
-      const blog = await this.findBlog(blogId);
-      if (!blog) {
-        return null;
-      }
+  ): Promise<BlogPostViewModel> {
+    const blog = await this.findBlog(blogId);
 
-      const newPost = {
-        _id: new Types.ObjectId(),
-        title: post.title,
-        shortDescription: post.shortDescription,
-        content: post.content,
-        blogId: blog.id,
-        blogName: blog.name,
-        createdAt: new Date().toISOString(),
-      } as PostDocument;
+    const newPost = {
+      _id: new Types.ObjectId(),
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      blogId: blog!.id,
+      blogName: blog!.name,
+      createdAt: new Date().toISOString(),
+    } as PostDocument;
 
-      await this.PostModel.create(newPost);
+    await this.PostModel.create(newPost);
 
-      return this.mapNewPostBlog(newPost);
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
+    return this.mapNewPostBlog(newPost);
   }
   public mapNewPostBlog(post: PostDocument): BlogPostViewModel {
     return {

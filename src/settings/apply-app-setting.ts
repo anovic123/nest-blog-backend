@@ -9,8 +9,7 @@ import cookieParser from 'cookie-parser';
 
 import { AppModule } from 'src/app.module';
 
-import { HttpExceptionFilter } from 'src/common/exception-filters/http-exception-filter';
-import configuration from './configuration';
+import { HttpExceptionFilter } from '../core/exception-filters/http-exception-filter';
 
 // const APP_PREFIX = '/api'
 

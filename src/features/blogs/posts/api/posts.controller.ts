@@ -14,25 +14,33 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { CommandBus } from '@nestjs/cqrs';
 
-import { BasicAuthGuard } from 'src/core/infrastructure/guards/auth-basic.guard';
-import { AuthGuard } from 'src/core/infrastructure/guards/auth.guard';
-import { RefreshTokenGuard } from 'src/core/infrastructure/guards/refresh-token.guard';
+import { BasicAuthGuard } from 'src/core/guards/auth-basic.guard';
+import { AuthGuard } from 'src/core/guards/auth.guard';
+import { RefreshTokenGuard } from 'src/core/guards/refresh-token.guard';
+
+import { IsPostExistPipe } from 'src/core/decorators/validate/is-post-exist.decorator';
 
 import { PostsService } from '../application/posts.service';
 
 import { PostsQueryRepository } from '../infra/posts-query-repository';
 
-import { IsPostExistPipe } from 'src/common/decorators/validate/is-post-exist.decorator';
-
 import { LikePostInputModel } from './models/input/like-post.input.model';
 import { PostInputModel } from './models/input/create-post.input.model';
+import { CreatePostCommand } from '../application/use-cases/create-post.use-case';
+import {
+  UpdatePostByIdCommand,
+  UpdatePostByIdUseCase,
+} from '../application/use-cases/update-post-by-id.use-case';
+import { DeletePostCommand } from '../application/use-cases/delete-post.use-case';
 
 @Controller('posts')
 export class PostsController {
   constructor(
     private readonly postsService: PostsService,
     private readonly postQueryRepository: PostsQueryRepository,
+    private readonly commandBus: CommandBus,
   ) {}
 
   // like posts
@@ -61,9 +69,7 @@ export class PostsController {
   @UseGuards(BasicAuthGuard)
   @Post()
   public async createPost(@Body() body: PostInputModel) {
-    const newPost = await this.postsService.createPost(body);
-
-    return newPost;
+    return this.commandBus.execute(new CreatePostCommand(body));
   }
 
   @UseGuards(RefreshTokenGuard)
@@ -100,13 +106,8 @@ export class PostsController {
     if (!id) {
       throw new NotFoundException(`Blog id is required`);
     }
-    const result = await this.postsService.putPostById(body, id);
 
-    if (!result) {
-      throw new NotFoundException(`post with id ${id} not found`);
-    }
-
-    return;
+    return this.commandBus.execute(new UpdatePostByIdCommand(body, id));
   }
 
   @UseGuards(BasicAuthGuard)
@@ -116,13 +117,7 @@ export class PostsController {
     if (!id) {
       throw new NotFoundException(`Blog id is required`);
     }
-    const result = await this.postsService.deletePost(id);
-
-    if (!result) {
-      throw new NotFoundException(`Blog with id ${id} not found`);
-    }
-
-    return;
+    return this.commandBus.execute(new DeletePostCommand(id));
   }
 
   @Get('/:id/comments')
