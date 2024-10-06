@@ -39,13 +39,8 @@ const setAppPipes = (app: INestApplication) => {
       exceptionFactory: (errors) => {
         const customErrors = [];
 
-        console.log(errors);
-
         errors.forEach((e) => {
           const constraintKeys = Object.keys(e.constraints as any);
-
-          console.log(e.constraints);
-
           constraintKeys.forEach((cKey, index) => {
             if (index >= 1) return;
             const msg = e.constraints?.[cKey] as any;

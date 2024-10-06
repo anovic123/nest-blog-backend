@@ -14,12 +14,23 @@ import {
 
 import { PostInputModel } from '../api/models/input/create-post.input.model';
 import { PostViewModel } from '../api/models/output';
+import {
+  Comments,
+  CommentsDocument,
+} from '../../comments/domain/comments.schema';
+import {
+  CommentDBType,
+  CommentViewModel,
+  LikeCommentStatus,
+} from '../../comments/api/models/output';
 
 @Injectable()
 export class PostsRepository {
   constructor(
     @InjectModel(Post.name) private PostModel: Model<PostDocument>,
     @InjectModel(LikePost.name) private LikePostModel: Model<LikePostDocument>,
+    @InjectModel(Comments.name)
+    private readonly CommentsModel: Model<CommentsDocument>,
   ) {}
 
   public async createPost(post: PostDocument): Promise<boolean> {
@@ -164,5 +175,30 @@ export class PostsRepository {
     };
 
     return postForOutput;
+  }
+
+  public async createPostComment(
+    comment: CommentDBType,
+  ): Promise<CommentViewModel | null> {
+    const result = await this.CommentsModel.create(comment);
+    return this.mapPostCommentsOutput(comment);
+  }
+
+  public mapPostCommentsOutput(comment: CommentDBType): CommentViewModel {
+    const commentForOutput = {
+      id: comment.id,
+      content: comment.content,
+      commentatorInfo: {
+        userId: comment.commentatorInfo.userId,
+        userLogin: comment.commentatorInfo.userLogin,
+      },
+      createdAt: comment.createdAt,
+      likesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: LikeCommentStatus.NONE,
+      },
+    };
+    return commentForOutput;
   }
 }

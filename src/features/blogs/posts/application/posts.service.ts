@@ -22,10 +22,16 @@ export class PostsService {
     bodyLikesStatus: LikePostStatus,
     userId: User['_id'],
   ) {
+    if (!userId) return;
+
     const user = await this.usersRepository.findUserById(userId);
 
     if (!user) {
       throw new HttpException('user', HttpStatus.NOT_FOUND);
+    }
+
+    if (userLikesStatus === bodyLikesStatus) {
+      return;
     }
 
     const { login } = user.accountData;
@@ -41,7 +47,9 @@ export class PostsService {
         await this.postsRepository.dislikePost(userId, postId, login);
         break;
       default:
-        return false;
+        return;
     }
+
+    return;
   }
 }

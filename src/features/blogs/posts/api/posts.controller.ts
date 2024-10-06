@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   NotFoundException,
   Param,
@@ -34,6 +35,10 @@ import {
   UpdatePostByIdUseCase,
 } from '../application/use-cases/update-post-by-id.use-case';
 import { DeletePostCommand } from '../application/use-cases/delete-post.use-case';
+import { Public } from '../../../../core/decorators/public.decorator';
+import { RequestWithUser } from '../../../../base/types/request';
+import { CommentInputModel } from '../../comments/api/models/input/comment.input.model';
+import { CreatePostCommentCommand } from '../application/use-cases/create-post-comment.';
 
 @Controller('posts')
 export class PostsController {
@@ -48,15 +53,20 @@ export class PostsController {
   @Put('/:postId/like-status')
   @HttpCode(HttpStatus.NO_CONTENT)
   public async likePost(
-    @Param('postId', IsPostExistPipe) postId: string,
+    @Param('postId') postId: string,
     @Body() body: LikePostInputModel,
-    @Req() request: Request,
+    @Req() request: RequestWithUser,
   ) {
     const user = request['user'];
     const post = await this.postQueryRepository.findPostsAndMap(
       postId,
-      user.userId,
+      user?.userId,
     );
+
+    if (!post) {
+      throw new NotFoundException();
+    }
+
     return this.postsService.postLike(
       postId,
       post?.extendedLikesInfo.myStatus,
@@ -72,24 +82,31 @@ export class PostsController {
     return this.commandBus.execute(new CreatePostCommand(body));
   }
 
-  @UseGuards(RefreshTokenGuard)
+  @Public()
+  @UseGuards(AuthGuard)
   @Get()
   public async getPosts(
     @Query() query: { [key: string]: string | undefined },
-    @Req() request: any,
+    @Req() request: RequestWithUser,
   ) {
-    return this.postQueryRepository.getAllPosts(query, request.userId);
+    const user = request['user'];
+    return this.postQueryRepository.getAllPosts(query, user?.userId);
   }
 
-  @UseGuards(RefreshTokenGuard)
+  @Public()
+  @UseGuards(AuthGuard)
   @Get('/:id')
-  public async getPostsById(@Param('id') id: string, @Req() request: any) {
+  public async getPostsById(
+    @Param('id') id: string,
+    @Req() request: RequestWithUser,
+  ) {
+    const user = request['user'];
     if (!id) {
       throw new NotFoundException(`Blog id is required`);
     }
     const post = await this.postQueryRepository.findPostsAndMap(
       id,
-      request.userId,
+      user?.userId,
     );
 
     if (!post) {
@@ -120,17 +137,24 @@ export class PostsController {
     return this.commandBus.execute(new DeletePostCommand(id));
   }
 
+  @Public()
+  @UseGuards(AuthGuard)
   @Get('/:id/comments')
   public async getPostsComments(
     @Param('postId') postId: string,
     @Query() query: { [key: string]: string | undefined },
+    @Req() request: RequestWithUser,
   ) {
     if (!postId) {
       throw new NotFoundException(`Blog id is required`);
     }
+
+    const user = request['user'];
+
     const result = await this.postQueryRepository.getPostsComments(
       query,
       postId,
+      user?.userId,
     );
 
     if (!result || result.items.length === 0) {
@@ -138,5 +162,23 @@ export class PostsController {
     }
 
     return result;
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/:postId/comments')
+  @HttpCode(HttpStatus.CREATED)
+  public async createPostComment(
+    @Param('postId') postId: string,
+    @Body() body: CommentInputModel,
+    @Req() request: RequestWithUser,
+  ) {
+    if (!postId) {
+      throw new NotFoundException(`post id is required`);
+    }
+
+    const user = request['user'];
+    return this.commandBus.execute(
+      new CreatePostCommentCommand(postId, body.content, user?.userId),
+    );
   }
 }

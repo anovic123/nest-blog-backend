@@ -6,6 +6,7 @@ import { Post, PostDocument } from '../domain/post.schema';
 import {
   Comments,
   CommentsDocument,
+  LikesComment,
 } from '../../comments/domain/comments.schema';
 import {
   LikePost,
@@ -16,7 +17,10 @@ import {
 import { getAllPostsHelper, GetAllPostsHelperResult } from '../helper';
 
 import { PostViewModel } from '../api/models/output';
-import { CommentDBType } from '../../comments/api/models/output';
+import {
+  CommentDBType,
+  LikeCommentStatus,
+} from '../../comments/api/models/output';
 import { PaginatedResponse } from '../../../../base/types/pagination';
 
 @Injectable()
@@ -25,6 +29,8 @@ export class PostsQueryRepository {
     @InjectModel(Post.name) private PostModel: Model<PostDocument>,
     @InjectModel(Comments.name) private CommentsModel: Model<CommentsDocument>,
     @InjectModel(LikePost.name) private LikePostModel: Model<LikePostDocument>,
+    @InjectModel(LikesComment.name)
+    private LikesCommentModel: Model<LikesComment>,
   ) {}
 
   public async getAllPosts(
@@ -81,6 +87,11 @@ export class PostsQueryRepository {
     userId?: string,
   ): Promise<PostViewModel | null> {
     try {
+      const isValidId = Types.ObjectId.isValid(id);
+
+      if (!isValidId) {
+        return null;
+      }
       const findedPost = (await this.PostModel.findOne({
         _id: new Types.ObjectId(id),
       })) as PostDocument;
@@ -149,6 +160,7 @@ export class PostsQueryRepository {
   public async getPostsComments(
     query: GetAllPostsHelperResult,
     postId: string,
+    userId?: string | null | undefined,
   ) {
     const sanitizedQuery = getAllPostsHelper(query);
 
@@ -178,7 +190,7 @@ export class PostsQueryRepository {
       const totalCount = await this.CommentsModel.countDocuments(filter);
 
       const mappedItems = await Promise.all(
-        items.map((i: CommentDBType) => this.mapPostCommentsOutput(i)),
+        items.map((i: CommentDBType) => this.mapPostCommentsOutput(i, userId)),
       );
 
       return {
@@ -194,7 +206,23 @@ export class PostsQueryRepository {
     }
   }
 
-  protected async mapPostCommentsOutput(comment: CommentDBType) {
+  protected async mapPostCommentsOutput(
+    comment: CommentDBType,
+    userId: string | null | undefined,
+  ) {
+    const likes = await this.LikesCommentModel.find({ commentId: comment.id });
+    const userLike = userId
+      ? likes.find((like) => like.authorId === userId)
+      : null;
+
+    const likesCount = likes.filter(
+      (l) => l.status === LikeCommentStatus.LIKE,
+    ).length;
+    const dislikesCount = likes.filter(
+      (l) => l.status === LikeCommentStatus.DISLIKE,
+    ).length;
+    const myStatus = userLike?.status ?? LikeCommentStatus.NONE;
+
     try {
       const commentForOutput = {
         id: comment.id,
@@ -205,9 +233,9 @@ export class PostsQueryRepository {
         },
         createdAt: comment.createdAt,
         likesInfo: {
-          likesCount: 0,
-          dislikesCount: 0,
-          myStatus: LikePostStatus.NONE,
+          likesCount,
+          dislikesCount,
+          myStatus,
         },
       };
       return commentForOutput;
