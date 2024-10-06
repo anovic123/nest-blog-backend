@@ -136,15 +136,15 @@ export class PostsController {
 
   @Public()
   @UseGuards(AuthGuard)
-  @Get('/:id/comments')
+  @Get('/:postId/comments')
   public async getPostsComments(
     @Param('postId') postId: string,
     @Query() query: { [key: string]: string | undefined },
     @Req() request: RequestWithUser,
   ) {
-    if (!postId) {
-      throw new NotFoundException(`Blog id is required`);
-    }
+    // if (!postId) {
+    //   throw new NotFoundException(`Blog id is required`);
+    // }
 
     const user = request['user'];
 
