@@ -28,6 +28,12 @@ export class UpdatePostByIdUseCase
 
     const blog = await this.blogsRepository.findBlog(body.blogId);
     if (!blog) {
+      throw new NotFoundException(`blog with id ${id} not found`);
+    }
+
+    const post = await this.postsRepository.isExistedPost(id);
+
+    if (!post) {
       throw new NotFoundException(`post with id ${id} not found`);
     }
 

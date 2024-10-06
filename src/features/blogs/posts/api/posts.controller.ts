@@ -121,7 +121,7 @@ export class PostsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   public async putPost(@Body() body: PostInputModel, @Param('id') id: string) {
     if (!id) {
-      throw new NotFoundException(`Blog id is required`);
+      throw new NotFoundException(`post id is required`);
     }
 
     return this.commandBus.execute(new UpdatePostByIdCommand(body, id));

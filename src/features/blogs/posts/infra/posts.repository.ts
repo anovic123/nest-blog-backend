@@ -145,7 +145,7 @@ export class PostsRepository {
     postId: string,
     login: string,
   ): Promise<boolean> {
-    await this.LikePostModel.findByIdAndUpdate(
+    await this.LikePostModel.findOneAndUpdate(
       {
         postId,
         authorId: userId,

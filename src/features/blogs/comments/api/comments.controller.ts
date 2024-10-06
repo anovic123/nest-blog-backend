@@ -56,16 +56,16 @@ export class CommentsController {
   @UseGuards(AuthGuard)
   @Get('/:commentId')
   public async getCommentsById(
-    @Param('id') id: string,
+    @Param('commentId') commentId: string,
     @Req() request: RequestWithUser,
   ) {
     const user = request['user'];
     const commentsRes = await this.commentsQueryRepository.getCommentById(
-      id,
+      commentId,
       user?.userId,
     );
     if (!commentsRes) {
-      throw new NotFoundException(`Blog with id ${id} not found`);
+      throw new NotFoundException(`Blog with id ${commentId} not found`);
     }
 
     return commentsRes;
@@ -76,7 +76,7 @@ export class CommentsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteCommentById(
     @Param('commentId') commentId: string,
-    @Req() request: Request,
+    @Req() request: RequestWithUser,
   ) {
     const user = request['user'];
 

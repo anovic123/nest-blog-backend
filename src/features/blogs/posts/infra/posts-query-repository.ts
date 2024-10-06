@@ -215,12 +215,10 @@ export class PostsQueryRepository {
       ? likes.find((like) => like.authorId === userId)
       : null;
 
-    const likesCount = likes.filter(
-      (l) => l.status === LikeCommentStatus.LIKE,
-    ).length;
-    const dislikesCount = likes.filter(
-      (l) => l.status === LikeCommentStatus.DISLIKE,
-    ).length;
+    const likesCount =
+      likes.filter((l) => l.status === LikeCommentStatus.LIKE).length ?? 0;
+    const dislikesCount =
+      likes.filter((l) => l.status === LikeCommentStatus.DISLIKE).length ?? 0;
     const myStatus = userLike?.status ?? LikeCommentStatus.NONE;
 
     try {

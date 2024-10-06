@@ -29,6 +29,7 @@ import { DeleteBlogCommand } from '../application/use-cases/delete-blog.use-case
 import { CreatePostBlogCommand } from '../application/use-cases/create-post-blog.use-case';
 import { AuthGuard } from '../../../../core/guards/auth.guard';
 import { Public } from '../../../../core/decorators/public.decorator';
+import { RequestWithUser } from '../../../../base/types/request';
 
 @Controller('blogs')
 export class BlogsController {
@@ -80,14 +81,14 @@ export class BlogsController {
   public async getBlogPosts(
     @Param('blogId') blogId: string,
     @Query() query: { [key: string]: string | undefined },
-    @Req() request: Request,
+    @Req() request: RequestWithUser,
   ) {
     const user = request['user'];
 
     const blogPostsResults = await this.blogsQueryRepository.getBlogPosts(
       query,
       blogId,
-      user?.id,
+      user?.userId,
     );
 
     if (!blogPostsResults || blogPostsResults.items.length === 0) {
