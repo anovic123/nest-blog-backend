@@ -1,5 +1,4 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PostsQueryRepository } from '../../infra/posts-query-repository';
 import { PostsRepository } from '../../infra/posts.repository';
 import { Types } from 'mongoose';
 import {
@@ -23,7 +22,6 @@ export class CreatePostCommentUseCase
   implements ICommandHandler<CreatePostCommentCommand>
 {
   constructor(
-    private readonly postsQueryRepository: PostsQueryRepository,
     private readonly postsRepository: PostsRepository,
     private readonly usersRepository: UsersRepository,
   ) {}
@@ -36,17 +34,18 @@ export class CreatePostCommentUseCase
       throw new HttpException('post', HttpStatus.BAD_REQUEST);
     }
 
-    const existedPost = await this.postsQueryRepository.findPostsAndMap(postId);
+    const existedPost = await this.postsRepository.isExistedPost(postId);
+
+    if (!existedPost) {
+      throw new HttpException('post', HttpStatus.NOT_FOUND);
+    }
+
     const user = await this.usersRepository.findUserById(
       new Types.ObjectId(userId),
     );
 
     if (!user) {
       return new UnauthorizedException();
-    }
-
-    if (!existedPost) {
-      return new HttpException('post', HttpStatus.NOT_FOUND);
     }
 
     const newComment = {
@@ -66,6 +65,6 @@ export class CreatePostCommentUseCase
     };
 
     const res = await this.postsRepository.createPostComment(newComment);
-    return newComment;
+    return res;
   }
 }

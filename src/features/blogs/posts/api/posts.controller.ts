@@ -121,7 +121,7 @@ export class PostsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   public async putPost(@Body() body: PostInputModel, @Param('id') id: string) {
     if (!id) {
-      throw new NotFoundException(`Blog id is required`);
+      throw new NotFoundException(`post id is required`);
     }
 
     return this.commandBus.execute(new UpdatePostByIdCommand(body, id));
@@ -131,23 +131,20 @@ export class PostsController {
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteUser(@Param('id') id: string) {
-    if (!id) {
-      throw new NotFoundException(`Blog id is required`);
-    }
     return this.commandBus.execute(new DeletePostCommand(id));
   }
 
   @Public()
   @UseGuards(AuthGuard)
-  @Get('/:id/comments')
+  @Get('/:postId/comments')
   public async getPostsComments(
     @Param('postId') postId: string,
     @Query() query: { [key: string]: string | undefined },
     @Req() request: RequestWithUser,
   ) {
-    if (!postId) {
-      throw new NotFoundException(`Blog id is required`);
-    }
+    // if (!postId) {
+    //   throw new NotFoundException(`Blog id is required`);
+    // }
 
     const user = request['user'];
 

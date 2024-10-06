@@ -78,6 +78,15 @@ export class PostsRepository {
     }
   }
 
+  public async isExistedPost(id: string): Promise<boolean> {
+    const isValidId = Types.ObjectId.isValid(id);
+
+    if (!isValidId) return false;
+    const res = await this.PostModel.find({ _id: id });
+
+    return res.length > 0;
+  }
+
   public async isPostExisted(postId: string): Promise<boolean> {
     const isValid = Types.ObjectId.isValid(postId);
 
@@ -136,7 +145,7 @@ export class PostsRepository {
     postId: string,
     login: string,
   ): Promise<boolean> {
-    await this.LikePostModel.findByIdAndUpdate(
+    await this.LikePostModel.findOneAndUpdate(
       {
         postId,
         authorId: userId,

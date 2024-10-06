@@ -40,6 +40,7 @@ import { DeleteCommentUseCase } from './comments/application/use-cases/delete-co
 import { UpdateCommentUseCase } from './comments/application/use-cases/update-comment.use-case';
 import { UpdateLikeCommentUseCase } from './comments/application/use-cases/update-like-comment.use-case';
 import { CreatePostCommentUseCase } from './posts/application/use-cases/create-post-comment.';
+import { BlogIsExistConstraint } from '../../core/pipes/is-blog-exist.pipe';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { CreatePostCommentUseCase } from './posts/application/use-cases/create-p
     UsersRepository,
     CommentsService,
     CommentsRepository,
+    BlogIsExistConstraint,
   ],
 })
 export class BlogersModule {}
