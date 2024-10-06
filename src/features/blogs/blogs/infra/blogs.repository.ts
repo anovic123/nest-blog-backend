@@ -22,65 +22,53 @@ export class BlogsRepository {
   ) {}
 
   public async createBlog(blog: BlogsDocument): Promise<BlogViewModel> {
-    try {
-      const result = await this.BlogModel.create(blog);
+    const result = await this.BlogModel.create(blog);
 
-      if (!result) {
-        throw new Error('Error while creating blog');
-      }
-
-      return this.mapBlog(result);
-    } catch (error) {
-      throw new Error(error);
+    if (!result) {
+      throw new Error('Error while creating blog');
     }
+
+    return this.mapBlog(result);
   }
 
   public async updateBlog(
     blog: BlogInputModel,
     id: BlogViewModel['id'],
   ): Promise<boolean> {
-    try {
-      const result = await this.BlogModel.updateOne(
-        { _id: new Types.ObjectId(id) },
-        {
-          $set: {
-            name: blog.name,
-            description: blog.description,
-            websiteUrl: blog.websiteUrl,
-          },
+    const result = await this.BlogModel.updateOne(
+      { _id: new Types.ObjectId(id) },
+      {
+        $set: {
+          name: blog.name,
+          description: blog.description,
+          websiteUrl: blog.websiteUrl,
         },
-      );
+      },
+    );
 
-      return result.matchedCount === 1;
-    } catch (error) {
-      throw new Error(error);
-    }
+    return result.matchedCount === 1;
   }
 
   public async deleteBlog(id: BlogViewModel['id']): Promise<boolean> {
-    try {
-      const result = await this.BlogModel.deleteOne({
-        _id: new Types.ObjectId(id),
-      });
-      return result.deletedCount === 1;
-    } catch (error) {
-      throw new Error(error);
-    }
+    const result = await this.BlogModel.deleteOne({
+      _id: new Types.ObjectId(id),
+    });
+    return result.deletedCount === 1;
   }
 
   public async findBlog(
     id: BlogViewModel['id'],
   ): Promise<BlogViewModel | null> {
-    try {
-      const res = await this.BlogModel.findOne({
-        _id: new Types.ObjectId(id),
-      });
+    const isValidId = Types.ObjectId.isValid(id);
 
-      if (!res) return null;
-      return this.mapBlog(res);
-    } catch (error) {
-      throw new Error(error);
-    }
+    if (!isValidId) return null;
+
+    const res = await this.BlogModel.findOne({
+      _id: new Types.ObjectId(id),
+    });
+
+    if (!res) return null;
+    return this.mapBlog(res);
   }
 
   public mapBlog(blog: BlogsDocument): BlogViewModel {
@@ -92,6 +80,10 @@ export class BlogsRepository {
       createdAt: blog.createdAt,
       isMembership: blog.isMembership,
     };
+  }
+
+  public async blogIsExist(id: string): Promise<boolean> {
+    return !!(await this.BlogModel.countDocuments({ _id: id }));
   }
 
   public async createPostBlog(

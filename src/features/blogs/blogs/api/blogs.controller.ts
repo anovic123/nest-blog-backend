@@ -10,6 +10,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
@@ -26,6 +27,8 @@ import { CreateBlogCommand } from '../application/use-cases/create-blog.use-case
 import { UpdateBlogCommand } from '../application/use-cases/update-blog.use-case';
 import { DeleteBlogCommand } from '../application/use-cases/delete-blog.use-case';
 import { CreatePostBlogCommand } from '../application/use-cases/create-post-blog.use-case';
+import { AuthGuard } from '../../../../core/guards/auth.guard';
+import { Public } from '../../../../core/decorators/public.decorator';
 
 @Controller('blogs')
 export class BlogsController {
@@ -71,14 +74,20 @@ export class BlogsController {
     return this.commandBus.execute(new DeleteBlogCommand(id));
   }
 
+  @Public()
+  @UseGuards(AuthGuard)
   @Get('/:blogId/posts')
   public async getBlogPosts(
     @Param('blogId') blogId: string,
     @Query() query: { [key: string]: string | undefined },
+    @Req() request: Request,
   ) {
+    const user = request['user'];
+
     const blogPostsResults = await this.blogsQueryRepository.getBlogPosts(
       query,
       blogId,
+      user?.id,
     );
 
     if (!blogPostsResults || blogPostsResults.items.length === 0) {

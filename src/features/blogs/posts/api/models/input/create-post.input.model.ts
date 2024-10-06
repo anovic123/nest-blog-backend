@@ -1,5 +1,6 @@
 import { IsString, Length } from 'class-validator';
 import { Trim } from 'src/core/decorators';
+import { BlogIsExist } from '../../../../../../core/pipes/is-blog-exist.pipe';
 
 export class PostInputModel {
   @IsString()
@@ -16,5 +17,6 @@ export class PostInputModel {
   content: string;
   @IsString()
   @Trim()
+  @BlogIsExist()
   blogId: string;
 }

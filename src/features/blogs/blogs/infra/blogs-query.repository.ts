@@ -20,12 +20,17 @@ import {
 
 import { PaginatedResponse } from '../../../../base/types/pagination';
 import { PostViewModel } from '../../posts/api/models/output';
+import {
+  LikePost,
+  LikePostDocument,
+} from '../../posts/domain/post-like.schema';
 
 @Injectable()
 export class BlogsQueryRepository {
   constructor(
     @InjectModel(Blog.name) private BlogModel: Model<BlogsDocument>,
     @InjectModel(Post.name) private PostModel: Model<PostDocument>,
+    @InjectModel(LikePost.name) private LikePostModel: Model<LikePostDocument>,
   ) {}
 
   public async getAllBlogs(
@@ -109,6 +114,7 @@ export class BlogsQueryRepository {
   public async getBlogPosts(
     query: GetBlogPostsHelperResult,
     blogId: string,
+    userId?: string | null | undefined,
   ): Promise<PaginatedResponse<BlogPostViewModel>> {
     const sanitizedQuery = getBlogPostsHelper(
       query as { [key: string]: string | undefined },
@@ -133,7 +139,7 @@ export class BlogsQueryRepository {
       const totalCount = await this.PostModel.countDocuments(filter);
 
       const mappedItems = await Promise.all(
-        items.map((i: any) => this.mapPostOutput(i)),
+        items.map((i: any) => this.mapPostOutput(i, userId)),
       );
 
       return {
@@ -155,7 +161,35 @@ export class BlogsQueryRepository {
     }
   }
 
-  public async mapPostOutput(post: PostDocument): Promise<PostViewModel> {
+  public async mapPostOutput(
+    post: PostDocument,
+    userId?: string | null | undefined,
+  ): Promise<PostViewModel> {
+    const likes = await this.LikePostModel.find({
+      postId: new Types.ObjectId(post._id).toString(),
+    });
+
+    const userLike = userId ? likes.find((l) => l.authorId === userId) : null;
+
+    const likesCount =
+      likes.filter((l) => l.status === LikePostStatus.LIKE).length ?? 0;
+    const dislikesCount =
+      likes.filter((l) => l.status === LikePostStatus.DISLIKE).length ?? 0;
+    const myStatus = userLike?.status ?? LikePostStatus.NONE;
+
+    const newestLikes = likes
+      .filter((l) => l.status === LikePostStatus.LIKE)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      .slice(0, 3)
+      .map((l) => ({
+        addedAt: l.createdAt,
+        userId: l.authorId,
+        login: l.login,
+      }));
+
     const postForOutput: PostViewModel = {
       id: new Types.ObjectId(post._id).toString(),
       title: post.title,
@@ -165,10 +199,10 @@ export class BlogsQueryRepository {
       blogName: post.blogName,
       createdAt: post.createdAt,
       extendedLikesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: LikePostStatus.NONE,
-        newestLikes: [],
+        likesCount,
+        dislikesCount,
+        myStatus,
+        newestLikes: newestLikes.length > 0 ? newestLikes : [],
       },
     };
 
