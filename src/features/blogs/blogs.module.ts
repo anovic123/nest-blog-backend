@@ -20,7 +20,12 @@ import { CommentsRepository } from './comments/infra/comments.repository';
 
 import { Blog, blogSchema } from './blogs/domain/blogs.schema';
 import { Post, postSchema } from './posts/domain/post.schema';
-import { Comments, commentsSchema } from './comments/domain/comments.schema';
+import {
+  Comments,
+  commentsSchema,
+  LikesComment,
+  likesCommentsSchema,
+} from './comments/domain/comments.schema';
 import { User, userSchema } from '../users/domain/users.schema';
 import { LikePost, postLikeSchema } from './posts/domain/post-like.schema';
 
@@ -31,6 +36,10 @@ import { CreateBlogUseCase } from './blogs/application/use-cases/create-blog.use
 import { UpdateBlogUseCase } from './blogs/application/use-cases/update-blog.use-case';
 import { DeleteBlogUseCase } from './blogs/application/use-cases/delete-blog.use-case';
 import { CreatePostBlogUseCase } from './blogs/application/use-cases/create-post-blog.use-case';
+import { DeleteCommentUseCase } from './comments/application/use-cases/delete-comment.use-case';
+import { UpdateCommentUseCase } from './comments/application/use-cases/update-comment.use-case';
+import { UpdateLikeCommentUseCase } from './comments/application/use-cases/update-like-comment.use-case';
+import { CreatePostCommentUseCase } from './posts/application/use-cases/create-post-comment.';
 
 @Module({
   imports: [
@@ -41,6 +50,7 @@ import { CreatePostBlogUseCase } from './blogs/application/use-cases/create-post
       { name: Comments.name, schema: commentsSchema },
       { name: User.name, schema: userSchema },
       { name: LikePost.name, schema: postLikeSchema },
+      { name: LikesComment.name, schema: likesCommentsSchema },
     ]),
   ],
   controllers: [BlogsController, PostsController, CommentsController],
@@ -52,6 +62,10 @@ import { CreatePostBlogUseCase } from './blogs/application/use-cases/create-post
     UpdateBlogUseCase,
     DeleteBlogUseCase,
     CreatePostBlogUseCase,
+    DeleteCommentUseCase,
+    UpdateCommentUseCase,
+    UpdateLikeCommentUseCase,
+    CreatePostCommentUseCase,
     BlogsService,
     BlogsRepository,
     BlogsQueryRepository,
