@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { CommentsRepository } from '../../infra/comments.repository';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 
 export class DeleteCommentCommand {
   constructor(
@@ -18,10 +18,17 @@ export class DeleteCommentUseCase
 
   async execute(command: DeleteCommentCommand) {
     const { commentId, userId } = command;
+
+    const isExisted = await this.commentsRepository.isExistedComment(commentId);
+
+    if (!isExisted) {
+      throw new NotFoundException();
+    }
+
     const isOwn = await this.commentsRepository.checkIsOwn(commentId, userId);
 
     if (!isOwn) {
-      throw new HttpException('auth', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('auth', HttpStatus.FORBIDDEN);
     }
 
     await this.commentsRepository.deleteComment(commentId);

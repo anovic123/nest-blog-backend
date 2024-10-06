@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentsRepository } from '../../infra/comments.repository';
 import { CommentInputModel } from '../../api/models/input/comment.input.model';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 
 export class UpdateCommentCommand {
   constructor(
@@ -20,10 +20,16 @@ export class UpdateCommentUseCase
   async execute(command: UpdateCommentCommand) {
     const { commentId, body, userId } = command;
 
+    const isExisted = await this.commentsRepository.isExistedComment(commentId);
+
+    if (!isExisted) {
+      throw new NotFoundException();
+    }
+
     const isOwn = await this.commentsRepository.checkIsOwn(commentId, userId);
 
     if (!isOwn) {
-      throw new HttpException('auth', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('auth', HttpStatus.FORBIDDEN);
     }
 
     const res = await this.commentsRepository.updateComment(

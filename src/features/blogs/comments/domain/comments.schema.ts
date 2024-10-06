@@ -3,7 +3,7 @@ import { HydratedDocument } from 'mongoose';
 import { LikeCommentStatus } from '../api/models/output';
 
 export type CommentsDocument = HydratedDocument<Comments>;
-export type c = HydratedDocument<LikesComment>;
+export type LikeCommentsDocument = HydratedDocument<LikesComment>;
 
 export class LikeCommentDBType {
   createdAt: Date;
@@ -68,22 +68,16 @@ export class Comments {
   content: string;
 
   @Prop({
-    type: String,
-    required: true,
-  })
-  createdAt: string;
-
-  @Prop({
     type: CommentatorInfo,
     required: true,
   })
   commentatorInfo: CommentatorInfo;
 
   @Prop({
-    type: LikesComment,
+    type: String,
     required: true,
   })
-  likesInfo: LikesComment;
+  createdAt: string;
 
   @Prop({
     type: String,

@@ -4,7 +4,7 @@ import { CommentsRepository } from '../../infra/comments.repository';
 import { CommentsQueryRepository } from '../../infra/comments-query.repository';
 
 import { LikeCommentStatus } from '../../api/models/output';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 export class UpdateLikeCommentCommand {
   constructor(
@@ -25,6 +25,9 @@ export class UpdateLikeCommentUseCase
 
   async execute(command: UpdateLikeCommentCommand) {
     const { userId, body, commentId } = command;
+    if (!userId) {
+      throw new UnauthorizedException();
+    }
 
     const comment = await this.commentsQueryRepository.getCommentById(
       commentId,
@@ -34,7 +37,7 @@ export class UpdateLikeCommentUseCase
     const postId =
       await this.commentsRepository.getPostIdByCommentId(commentId);
 
-    if (!comment || !userId || !postId) {
+    if (!comment || !postId) {
       throw new NotFoundException();
     }
 

@@ -53,6 +53,7 @@ export class CommentsController {
   }
 
   @Public()
+  @UseGuards(AuthGuard)
   @Get('/:commentId')
   public async getCommentsById(
     @Param('id') id: string,

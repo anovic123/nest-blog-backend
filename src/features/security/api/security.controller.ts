@@ -7,7 +7,6 @@ export class SecurityController {
 
   @Get('/devices')
   public getAllDevices(@Req() request: Request) {
-    console.log(request.cookies);
   }
 
   // delete all sessions, but not current

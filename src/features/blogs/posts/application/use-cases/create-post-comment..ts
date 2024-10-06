@@ -2,7 +2,11 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PostsQueryRepository } from '../../infra/posts-query-repository';
 import { PostsRepository } from '../../infra/posts.repository';
 import { Types } from 'mongoose';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersRepository } from '../../../../users/infra/users.repository';
 import { LikeCommentStatus } from '../../../comments/api/models/output';
 
@@ -26,7 +30,6 @@ export class CreatePostCommentUseCase
 
   async execute(command: CreatePostCommentCommand) {
     const { postId, content, userId } = command;
-
     const postsId = new Types.ObjectId(postId);
 
     if (!Types.ObjectId.isValid(postsId)) {
@@ -34,14 +37,15 @@ export class CreatePostCommentUseCase
     }
 
     const existedPost = await this.postsQueryRepository.findPostsAndMap(postId);
-    console.log('existedPost', existedPost);
-
     const user = await this.usersRepository.findUserById(
       new Types.ObjectId(userId),
     );
-    console.log('user', user);
 
-    if (!existedPost || !user) {
+    if (!user) {
+      return new UnauthorizedException();
+    }
+
+    if (!existedPost) {
       return new HttpException('post', HttpStatus.NOT_FOUND);
     }
 
@@ -62,7 +66,6 @@ export class CreatePostCommentUseCase
     };
 
     const res = await this.postsRepository.createPostComment(newComment);
-    console.log(res);
-    return res;
+    return newComment;
   }
 }

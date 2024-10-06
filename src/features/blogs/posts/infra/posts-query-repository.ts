@@ -87,6 +87,11 @@ export class PostsQueryRepository {
     userId?: string,
   ): Promise<PostViewModel | null> {
     try {
+      const isValidId = Types.ObjectId.isValid(id);
+
+      if (!isValidId) {
+        return null;
+      }
       const findedPost = (await this.PostModel.findOne({
         _id: new Types.ObjectId(id),
       })) as PostDocument;

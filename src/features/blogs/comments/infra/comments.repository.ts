@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import {
   Comments,
   CommentsDocument,
+  LikeCommentsDocument,
   LikesComment,
 } from '../domain/comments.schema';
 import { LikeCommentStatus } from '../api/models/output';
@@ -15,7 +16,7 @@ export class CommentsRepository {
     @InjectModel(Comments.name)
     private readonly CommentsModel: Model<CommentsDocument>,
     @InjectModel(LikesComment.name)
-    private LikesCommentModel: Model<LikesComment>,
+    private LikesCommentModel: Model<LikeCommentsDocument>,
   ) {}
 
   public async checkIsOwn(commentId: string, userId: string): Promise<boolean> {
@@ -24,6 +25,12 @@ export class CommentsRepository {
     if (!comment) return false;
 
     return comment.commentatorInfo.userId === userId;
+  }
+
+  public async isExistedComment(commentId: string): Promise<boolean> {
+    const res = await this.CommentsModel.find({ id: commentId });
+
+    return res.length > 0;
   }
 
   public async deleteComment(commentId: string): Promise<boolean> {

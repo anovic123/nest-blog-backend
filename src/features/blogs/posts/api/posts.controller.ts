@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   NotFoundException,
   Param,
@@ -52,15 +53,20 @@ export class PostsController {
   @Put('/:postId/like-status')
   @HttpCode(HttpStatus.NO_CONTENT)
   public async likePost(
-    @Param('postId', IsPostExistPipe) postId: string,
+    @Param('postId') postId: string,
     @Body() body: LikePostInputModel,
-    @Req() request: Request,
+    @Req() request: RequestWithUser,
   ) {
     const user = request['user'];
     const post = await this.postQueryRepository.findPostsAndMap(
       postId,
-      user.userId,
+      user?.userId,
     );
+
+    if (!post) {
+      throw new NotFoundException();
+    }
+
     return this.postsService.postLike(
       postId,
       post?.extendedLikesInfo.myStatus,
@@ -77,6 +83,7 @@ export class PostsController {
   }
 
   @Public()
+  @UseGuards(AuthGuard)
   @Get()
   public async getPosts(
     @Query() query: { [key: string]: string | undefined },
@@ -87,6 +94,7 @@ export class PostsController {
   }
 
   @Public()
+  @UseGuards(AuthGuard)
   @Get('/:id')
   public async getPostsById(
     @Param('id') id: string,
@@ -130,6 +138,7 @@ export class PostsController {
   }
 
   @Public()
+  @UseGuards(AuthGuard)
   @Get('/:id/comments')
   public async getPostsComments(
     @Param('postId') postId: string,
@@ -168,7 +177,6 @@ export class PostsController {
     }
 
     const user = request['user'];
-    console.log(user);
     return this.commandBus.execute(
       new CreatePostCommentCommand(postId, body.content, user?.userId),
     );
