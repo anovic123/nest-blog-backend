@@ -21,6 +21,8 @@ const getConfig = (
     jwtSettings: {
       JWT_SECRET: environmentVariables.JWT_SECRET,
       HASH_ROUNDS: environmentVariables.HASH_ROUNDS,
+      EXPIRES_ACCESS_TOKEN: environmentVariables.EXPIRES_ACCESS_TOKEN,
+      EXPIRES_REFRESH_TOKEN: environmentVariables.EXPIRES_REFRESH_TOKEN,
     },
 
     basicSettings: {

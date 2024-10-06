@@ -6,10 +6,11 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
 import { IS_PUBLIC_KEY } from 'src/core/decorators/public.decorator';
+
+import { JwtService } from '../adapters/jwt-service';
 
 import { ConfigurationType } from 'src/settings/configuration';
 
@@ -36,16 +37,10 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractTokenFromHeader(request);
 
-    const jwtSettings = this.configService.get('jwtSettings', {
-      infer: true,
-    });
-
     if (isPublic) {
       if (token) {
         try {
-          const payload = await this.jwtService.verifyAsync(token, {
-            secret: jwtSettings.JWT_SECRET,
-          });
+          const payload = await this.jwtService.verifyToken(token);
           request['user'] = payload as JwtPayload;
         } catch {
           return true;
@@ -59,9 +54,7 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: jwtSettings.JWT_SECRET,
-      });
+      const payload = await this.jwtService.verifyToken(token);
       request['user'] = payload as JwtPayload;
     } catch {
       throw new UnauthorizedException('Invalid token');

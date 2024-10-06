@@ -1,24 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 
 import { UsersQueryRepository } from 'src/features/users/infra/users-query.repository';
-import { UsersRepository } from 'src/features/users/infra/users.repository';
-
-import { AuthRepository } from '../infra/auth-repository';
 
 import { CryptoService } from 'src/core/adapters/crypto-service';
 
-import { EmailsManager } from 'src/core/adapters/email.manager';
+import { JwtService } from '../../../core/adapters/jwt-service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly cryptoService: CryptoService,
-    private readonly authRepository: AuthRepository,
-    private readonly emailsManager: EmailsManager,
     private readonly usersQueryRepository: UsersQueryRepository,
-    private readonly usersRepository: UsersRepository,
   ) {}
 
   public async checkCredentials(
@@ -46,15 +39,15 @@ export class AuthService {
 
     const userId = user._id.toString();
 
-    const accessToken = this.jwtService.sign({ userId });
+    const tokens = await this.jwtService.createJWT(userId);
 
-    const refreshToken = this.jwtService.sign({
-      userId,
-    });
+    if (!tokens) {
+      throw new HttpException('', HttpStatus.UNAUTHORIZED);
+    }
 
     return {
-      accessToken,
-      refreshToken,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     };
   }
 }
