@@ -66,6 +66,6 @@ export class CreatePostCommentUseCase
     };
 
     const res = await this.postsRepository.createPostComment(newComment);
-    return newComment;
+    return res;
   }
 }
