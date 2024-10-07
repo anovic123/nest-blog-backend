@@ -4,11 +4,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../../features/users/domain/users.schema';
 
-interface JwtPayloadExtended extends JwtPayload {
+export interface JwtPayloadExtended extends JwtPayload {
   userId: string;
 }
 
-interface JwtRefreshPayloadExtended extends JwtPayload {
+export interface JwtRefreshPayloadExtended extends JwtPayload {
   userId: string;
   deviceId: string;
 }
@@ -16,7 +16,6 @@ interface JwtRefreshPayloadExtended extends JwtPayload {
 interface JwtTokensOutput {
   accessToken: string;
   refreshToken: string;
-  refreshTokenExp: string;
 }
 
 @Injectable()
@@ -51,9 +50,9 @@ export class JwtService {
       const accessToken = this._signAccessToken(userId);
       const refreshToken = this._signRefreshToken(userId, deviceId ?? uuidv4());
 
-      const { exp: refreshTokenExp } = jwt.decode(refreshToken) as JwtPayload;
+      const { exp } = jwt.decode(refreshToken) as JwtPayload;
 
-      if (!refreshTokenExp) {
+      if (!exp) {
         throw new HttpException(
           'Failed to create JWT',
           HttpStatus.UNAUTHORIZED,
@@ -63,7 +62,6 @@ export class JwtService {
       return {
         accessToken,
         refreshToken,
-        refreshTokenExp: new Date(refreshTokenExp * 1000).toISOString(),
       };
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error: any) {

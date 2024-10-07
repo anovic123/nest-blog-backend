@@ -31,7 +31,13 @@ import { CreateUserCommand } from '../application/use-cases/create-user.use-case
 import { ConfirmEmailCommand } from '../application/use-cases/confirm-email.use-case';
 import { NewPasswordCommand } from '../application/use-cases/new-password.use-case';
 import { PasswordRecoveryCommand } from '../application/use-cases/password-recovery.use-case';
+import { RefreshTokenGuard } from '../../../core/guards/refresh-token.guard';
+import { LogoutUserCommand } from '../application/use-cases/logout-user.use-case';
+import { RefreshTokenCommand } from '../application/use-cases/refresh-token.use-case';
+import { CreateSessionCommand } from '../application/use-cases/create-session';
+import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
 
+@UseGuards(ThrottlerGuard)
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -45,15 +51,58 @@ export class AuthController {
   public async loginUser(
     @Body() bodyLoginEmail: BodyLoginModel,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: any,
   ) {
     const { loginOrEmail, password } = bodyLoginEmail;
     const { accessToken, refreshToken } =
       await this.authService.checkCredentials(loginOrEmail, password);
 
+    await this.commandBus.execute(
+      new CreateSessionCommand(
+        accessToken,
+        refreshToken,
+        req.headers['user-agent'] || 'unknown',
+        req.ip! || 'unknown',
+      ),
+    );
+
     res
       .cookie('refreshToken', refreshToken, { httpOnly: true, secure: true })
       .header('Authorization', accessToken)
       .send({ accessToken });
+  }
+
+  @UseGuards(RefreshTokenGuard)
+  @Post('refresh-token')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async refreshToken(@Res() res: Response, @Req() req: RequestWithUser) {
+    const result = await this.commandBus.execute(
+      new RefreshTokenCommand(req.userId!, req.deviceId!),
+    );
+
+    const { accessToken, refreshToken } = result;
+
+    res
+      .cookie('refreshToken', refreshToken, { httpOnly: true, secure: true })
+      .status(200)
+      .json({ accessToken });
+  }
+
+  @UseGuards(RefreshTokenGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async logoutUser(
+    @Res() response: Response,
+    @Req() request: RequestWithUser,
+  ) {
+    const res = await this.commandBus.execute(
+      new LogoutUserCommand(request.deviceId!),
+    );
+
+    if (res) {
+      response.clearCookie('refreshToken');
+      response.sendStatus(204);
+    }
   }
 
   @Post('/password-recovery')
@@ -89,6 +138,7 @@ export class AuthController {
     return this.commandBus.execute(new ResendCodeCommand(emailResendingModel));
   }
 
+  @SkipThrottle()
   @UseGuards(AuthGuard)
   @Get('/me')
   public async getMe(@Req() request: RequestWithUser) {

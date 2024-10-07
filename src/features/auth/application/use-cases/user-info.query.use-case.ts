@@ -16,7 +16,6 @@ export class GetUserInfoHandler implements IQueryHandler<GetUserInfoQuery> {
 
   async execute(query: GetUserInfoQuery): Promise<UserInfoOutputModel> {
     const { id } = query;
-
     if (!Types.ObjectId.isValid(id)) {
       throw new HttpException('Invalid user ID', HttpStatus.BAD_REQUEST);
     }

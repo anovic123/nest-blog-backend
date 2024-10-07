@@ -6,6 +6,8 @@ import { Post, postSchema } from '../blogs/posts/domain/post.schema';
 import {
   Comments,
   commentsSchema,
+  LikesComment,
+  likesCommentsSchema,
 } from '../blogs/comments/domain/comments.schema';
 import { User, userSchema } from '../users/domain/users.schema';
 import {
@@ -18,6 +20,7 @@ import { TestingService } from './application/testing.service';
 import { TestingRepository } from './infra/testing.repository';
 
 import { TestingController } from './api/testing.controller';
+import { AuthDevice, authDeviceSchema } from '../security/domain/device.schema';
 
 @Module({
   imports: [
@@ -50,6 +53,15 @@ import { TestingController } from './api/testing.controller';
         name: LikePost.name,
         schema: postLikeSchema,
       },
+    ]),
+    MongooseModule.forFeature([
+      {
+        name: AuthDevice.name,
+        schema: authDeviceSchema,
+      },
+    ]),
+    MongooseModule.forFeature([
+      { name: LikesComment.name, schema: likesCommentsSchema },
     ]),
   ],
   controllers: [TestingController],
