@@ -2,30 +2,46 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UnauthorizedException } from '@nestjs/common';
 
 import { SecurityRepository } from '../../../security/infra/security.repository';
+import {
+  JwtRefreshPayloadExtended,
+  JwtService,
+} from '../../../../core/adapters/jwt-service';
 
 export class LogoutUserCommand {
-  constructor(public readonly deviceId: string) {}
+  constructor(public readonly requestRefreshToken: string) {}
 }
 
 @CommandHandler(LogoutUserCommand)
 export class LogoutUserUseCase implements ICommandHandler<LogoutUserCommand> {
-  constructor(private readonly securityRepository: SecurityRepository) {}
+  constructor(
+    private readonly securityRepository: SecurityRepository,
+    private jwtService: JwtService,
+  ) {}
 
   async execute(command: LogoutUserCommand): Promise<boolean> {
-    const { deviceId } = command;
+    const { requestRefreshToken } = command;
 
-    if (!deviceId) {
+    const decodedToken =
+      await this.jwtService.verifyToken<JwtRefreshPayloadExtended>(
+        requestRefreshToken,
+      );
+
+    if (!decodedToken) {
       throw new UnauthorizedException();
     }
 
-    const device =
-      await this.securityRepository.findSessionByDeviceId(deviceId);
+    const checkDeviceUser = await this.securityRepository.checkUserDeviceById(
+      decodedToken.userId,
+      decodedToken.deviceId,
+    );
 
-    if (!device) {
+    if (!checkDeviceUser) {
       throw new UnauthorizedException();
     }
 
-    const res = await this.securityRepository.deleteSecuritySession(deviceId);
+    const res = await this.securityRepository.deleteUserDeviceById(
+      decodedToken.deviceId,
+    );
     return res;
   }
 }

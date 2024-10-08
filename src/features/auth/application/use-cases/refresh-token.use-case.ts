@@ -2,14 +2,14 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { SecurityRepository } from '../../../security/infra/security.repository';
 
-import { JwtService } from 'src/core/adapters/jwt-service';
+import {
+  JwtRefreshPayloadExtended,
+  JwtService,
+} from 'src/core/adapters/jwt-service';
 import { UnauthorizedException } from '@nestjs/common';
 
 export class RefreshTokenCommand {
-  constructor(
-    public readonly userId: string,
-    public readonly deviceId: string,
-  ) {}
+  constructor(public readonly requestRefreshToken: string) {}
 }
 
 @CommandHandler(RefreshTokenCommand)
@@ -24,38 +24,61 @@ export class RefreshTokenUseCase
   async execute(command: RefreshTokenCommand): Promise<{
     accessToken: string;
     refreshToken: string;
+    refreshTokenExp: string;
   }> {
-    const { userId, deviceId } = command;
+    const { requestRefreshToken } = command;
 
-    if (!userId || !deviceId) {
+    const decodedToken =
+      await this.jwtService.verifyToken<JwtRefreshPayloadExtended>(
+        requestRefreshToken,
+      );
+
+    if (!decodedToken) {
       throw new UnauthorizedException();
     }
 
-    const device =
+    const { deviceId, exp: decodedExp } = decodedToken;
+
+    const deviceData =
       await this.securityRepository.findSessionByDeviceId(deviceId);
 
-    if (!device) {
+    if (!deviceData) {
       throw new UnauthorizedException();
     }
 
-    const newTokens = await this.jwtService.createJWT(userId, deviceId);
+    const isTokenExpired =
+      decodedExp &&
+      new Date(decodedExp * 1000) < new Date(deviceData.lastActiveDate);
 
-    if (!newTokens) {
+    if (isTokenExpired) {
       throw new UnauthorizedException();
     }
 
-    const { accessToken, refreshToken } = newTokens;
+    const newAccessToken = this.jwtService._signAccessToken(
+      decodedToken.userId,
+    );
+    const newRefreshToken = this.jwtService._signRefreshToken(
+      decodedToken.userId,
+      deviceId,
+    );
 
-    const refreshTokenDecoded = await this.jwtService.verifyToken(refreshToken);
+    const { exp: newRefreshTokenExp } =
+      this.jwtService.decodeToken(newRefreshToken);
 
-    if (!refreshTokenDecoded?.iat) {
+    if (!newRefreshTokenExp) {
       throw new UnauthorizedException();
     }
 
-    const newIat = new Date(refreshTokenDecoded.iat * 1000).toISOString();
+    await this.securityRepository.updateSessionUser(
+      decodedToken.userId,
+      deviceId,
+      newRefreshTokenExp,
+    );
 
-    await this.securityRepository.updateSessionDate(newIat, deviceId);
-
-    return { accessToken, refreshToken };
+    return {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+      refreshTokenExp: new Date(newRefreshTokenExp * 1000).toISOString(),
+    };
   }
 }

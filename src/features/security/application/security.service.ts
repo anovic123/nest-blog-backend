@@ -1,42 +1,82 @@
 import {
-  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 
 import { SecurityRepository } from '../infra/security.repository';
+import { JwtService } from '../../../core/adapters/jwt-service';
+import { SecurityQueryRepository } from '../infra/security.query.repository';
 
 @Injectable()
 export class SecurityService {
-  constructor(private readonly securityRepository: SecurityRepository) {}
+  constructor(
+    private readonly securityRepository: SecurityRepository,
+    private readonly jwtService: JwtService,
+    private readonly securityQueryRepository: SecurityQueryRepository,
+  ) {}
 
   public async getUserByDeviceId(deviceId: string) {
     return this.securityRepository.findSessionByDeviceId(deviceId);
   }
 
-  public async deleteSessionById(deviceId: string, userId: string) {
-    if (!deviceId) {
-      throw new NotFoundException();
-    }
+  public async deleteSessionById(refreshToken: string, deviceId: string) {
+    const refreshTokenData = await this.jwtService.getDataFromRefreshToken(
+      refreshToken,
+      this.securityRepository.findSessionByDeviceId.bind(
+        this.securityRepository,
+      ),
+    );
 
-    const curSession = await this.getUserByDeviceId(deviceId);
-
-    if (!curSession) {
-      throw new NotFoundException();
-    }
-
-    if (userId !== curSession?.user_id) {
-      throw new ForbiddenException();
-    }
-
-    return this.securityRepository.deleteSecuritySession(deviceId);
-  }
-
-  public async deleteAllSessions(userId: string, device_id: string) {
-    if (!device_id || !userId) {
+    if (!refreshTokenData) {
       throw new UnauthorizedException();
     }
-    return await this.securityRepository.deleteAllSessions(userId, device_id);
+
+    const userId = refreshTokenData.userId;
+
+    const checkDeviceUser = await this.securityRepository.checkUserDeviceById(
+      userId,
+      deviceId,
+    );
+
+    if (!checkDeviceUser) {
+      throw new NotFoundException();
+    }
+
+    await this.securityRepository.deleteUserDeviceById(deviceId);
+  }
+
+  public async deleteAllSessions(refreshToken: string) {
+    const refreshTokenData = await this.jwtService.getDataFromRefreshToken(
+      refreshToken,
+      this.securityRepository.findSessionByDeviceId.bind(
+        this.securityRepository,
+      ),
+    );
+
+    if (!refreshTokenData) {
+      throw new UnauthorizedException();
+    }
+
+    const { userId, deviceId } = refreshTokenData;
+
+    await this.securityRepository.deleteAllSessions(userId, deviceId);
+  }
+
+  public async getAllDevicesSessions(refreshToken: string) {
+    const refreshTokenData = await this.jwtService.getDataFromRefreshToken(
+      refreshToken,
+      this.securityRepository.findSessionByDeviceId.bind(
+        this.securityRepository,
+      ),
+    );
+
+    if (!refreshTokenData) {
+      throw new UnauthorizedException();
+    }
+
+    const { userId } = refreshTokenData;
+
+    return this.securityQueryRepository.findSessionsByUserId(userId);
   }
 }

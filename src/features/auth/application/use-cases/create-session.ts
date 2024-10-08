@@ -1,4 +1,5 @@
 import { CommandHandler } from '@nestjs/cqrs';
+import { v4 as uuidv4 } from 'uuid';
 import { UnauthorizedException } from '@nestjs/common';
 
 import {
@@ -8,12 +9,13 @@ import {
 
 import { SecurityRepository } from '../../../security/infra/security.repository';
 
+import { User } from '../../../users/domain/users.schema';
+
 export class CreateSessionCommand {
   constructor(
-    public readonly accessToken: string,
-    public readonly refreshToken: string,
-    public readonly userAgent: string,
+    public readonly userId: string,
     public readonly ip: string,
+    public readonly userAgent: string,
   ) {}
 }
 
@@ -25,22 +27,29 @@ export class CreateSessionUseCase {
   ) {}
 
   async execute(command: CreateSessionCommand) {
-    const { accessToken, refreshToken, userAgent, ip } = command;
+    const { userId, ip, userAgent } = command;
 
-    const payload =
-      await this.jwtService.verifyToken<JwtRefreshPayloadExtended>(
-        refreshToken,
-      );
-    if (!payload) {
+    const deviceId = uuidv4();
+
+    const tokens = await this.jwtService.createJWT(userId, deviceId);
+
+    if (!tokens) {
       throw new UnauthorizedException();
     }
-    const newSession = await this.securityRepository.createSession({
-      user_id: payload.userId,
-      device_id: payload.deviceId,
-      iat: new Date(payload.iat! * 1000).toISOString(),
+
+    await this.securityRepository.insertNewUserDevice({
       ip,
-      exp: new Date(payload.exp! * 1000).toISOString(),
+      user_id: userId,
+      device_id: deviceId,
       device_name: userAgent,
+      exp: tokens.refreshTokenExp,
     });
+
+    const { accessToken, refreshToken } = tokens;
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 }

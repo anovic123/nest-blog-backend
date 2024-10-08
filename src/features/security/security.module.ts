@@ -10,6 +10,7 @@ import { SecurityService } from './application/security.service';
 import { SecurityRepository } from './infra/security.repository';
 import { SecurityQueryRepository } from './infra/security.query.repository';
 import { UsersModule } from '../users/users.module';
+import { JwtService } from '../../core/adapters/jwt-service';
 
 @Module({
   imports: [
@@ -21,7 +22,12 @@ import { UsersModule } from '../users/users.module';
       },
     ]),
   ],
-  providers: [SecurityService, SecurityRepository, SecurityQueryRepository],
+  providers: [
+    SecurityService,
+    SecurityRepository,
+    SecurityQueryRepository,
+    JwtService,
+  ],
   controllers: [SecurityController],
   exports: [SecurityRepository],
 })

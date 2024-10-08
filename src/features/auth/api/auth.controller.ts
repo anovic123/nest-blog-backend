@@ -7,6 +7,7 @@ import {
   Post,
   Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
@@ -54,17 +55,20 @@ export class AuthController {
     @Req() req: any,
   ) {
     const { loginOrEmail, password } = bodyLoginEmail;
-    const { accessToken, refreshToken } =
-      await this.authService.checkCredentials(loginOrEmail, password);
+    const user = await this.authService.checkCredentials(
+      loginOrEmail,
+      password,
+    );
 
-    await this.commandBus.execute(
+    const newDeviceRes = await this.commandBus.execute(
       new CreateSessionCommand(
-        accessToken,
-        refreshToken,
-        req.headers['user-agent'] || 'unknown',
-        req.ip! || 'unknown',
+        user._id.toString(),
+        req.ip! || '0.0.0.0',
+        req.headers['user-agent'] || 'Unknown',
       ),
     );
+
+    const { accessToken, refreshToken } = newDeviceRes;
 
     res
       .cookie('refreshToken', refreshToken, { httpOnly: true, secure: true })
@@ -76,8 +80,10 @@ export class AuthController {
   @Post('refresh-token')
   @HttpCode(HttpStatus.NO_CONTENT)
   public async refreshToken(@Res() res: Response, @Req() req: RequestWithUser) {
+    const requestRefreshToken = req.cookies['refreshToken'];
+
     const result = await this.commandBus.execute(
-      new RefreshTokenCommand(req.userId!, req.deviceId!),
+      new RefreshTokenCommand(requestRefreshToken),
     );
 
     const { accessToken, refreshToken } = result;
@@ -95,8 +101,9 @@ export class AuthController {
     @Res() response: Response,
     @Req() request: RequestWithUser,
   ) {
+    const requestRefreshToken = request.cookies['refreshToken'];
     const res = await this.commandBus.execute(
-      new LogoutUserCommand(request.deviceId!),
+      new LogoutUserCommand(requestRefreshToken),
     );
 
     if (res) {

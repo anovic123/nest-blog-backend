@@ -4,7 +4,6 @@ import { HydratedDocument } from 'mongoose';
 export class AuthDevicesDB {
   user_id: string;
   device_id: string;
-  iat: string;
   ip: string;
   exp: string;
   device_name: string;
@@ -18,8 +17,6 @@ export class AuthDevice {
   user_id: string;
   @Prop({ type: String, required: true })
   device_id: string;
-  @Prop({ required: true })
-  iat: string;
   @Prop({ type: String, required: true })
   ip: string;
   @Prop({ type: String, required: true })

@@ -34,7 +34,7 @@ export class SecurityQueryRepository {
     return {
       ip: s.ip,
       title: s.device_name,
-      lastActiveDate: s.iat,
+      lastActiveDate: s.exp,
       deviceId: s.device_id,
     };
   }
