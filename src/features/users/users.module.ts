@@ -45,6 +45,6 @@ import { DeleteUserUseCase } from './application/use-cases/delete-user.use-case'
     AuthRepository,
     AuthService,
   ],
-  exports: [UsersService],
+  exports: [UsersService, UsersRepository],
 })
 export class UsersModule {}

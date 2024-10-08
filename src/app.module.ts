@@ -2,6 +2,7 @@ import configuration, { ConfigurationType } from './settings/configuration';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 import { UsersModule } from './features/users/users.module';
 import { BlogersModule } from './features/blogs/blogs.module';
@@ -47,6 +48,12 @@ const modules = [
       },
       inject: [ConfigService],
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000,
+        limit: 5,
+      },
+    ]),
     ...modules,
   ],
   controllers: [],

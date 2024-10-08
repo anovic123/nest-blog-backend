@@ -25,11 +25,16 @@ import { CreateUserUseCase } from './application/use-cases/create-user.use-case'
 import { ConfirmEmailUseCase } from './application/use-cases/confirm-email.use-case';
 import { NewPasswordUseCase } from './application/use-cases/new-password.use-case';
 import { PasswordRecoveryUseCase } from './application/use-cases/password-recovery.use-case';
+import { SecurityModule } from '../security/security.module';
+import { LogoutUserUseCase } from './application/use-cases/logout-user.use-case';
+import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
+import { CreateSessionUseCase } from './application/use-cases/create-session';
 
 @Module({
   imports: [
     AdaptersModule,
     CqrsModule,
+    SecurityModule,
     MongooseModule.forFeature([
       {
         name: User.name,
@@ -43,8 +48,10 @@ import { PasswordRecoveryUseCase } from './application/use-cases/password-recove
     ConfirmEmailUseCase,
     NewPasswordUseCase,
     PasswordRecoveryUseCase,
+    LogoutUserUseCase,
+    RefreshTokenUseCase,
+    CreateSessionUseCase,
     GetUserInfoHandler,
-
     AuthService,
     AuthRepository,
     UsersQueryRepository,
