@@ -24,7 +24,7 @@ export class RefreshTokenUseCase
   async execute(command: RefreshTokenCommand): Promise<{
     accessToken: string;
     refreshToken: string;
-    refreshTokenExp: string;
+    refreshTokenExp: any;
   }> {
     const { requestRefreshToken } = command;
 
@@ -43,6 +43,12 @@ export class RefreshTokenUseCase
       await this.securityRepository.findSessionByDeviceId(deviceId);
 
     if (!deviceData) {
+      throw new UnauthorizedException('Session not found');
+    }
+
+    if (
+      deviceData?.lastActiveDate !== new Date(decodedExp! * 1000).toISOString()
+    ) {
       throw new UnauthorizedException();
     }
 
@@ -51,7 +57,7 @@ export class RefreshTokenUseCase
       new Date(decodedExp * 1000) < new Date(deviceData.lastActiveDate);
 
     if (isTokenExpired) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Refresh token has expired');
     }
 
     const newAccessToken = this.jwtService._signAccessToken(
@@ -66,13 +72,13 @@ export class RefreshTokenUseCase
       this.jwtService.decodeToken(newRefreshToken);
 
     if (!newRefreshTokenExp) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Failed to generate new refresh token');
     }
 
     await this.securityRepository.updateSessionUser(
       decodedToken.userId,
       deviceId,
-      newRefreshTokenExp,
+      new Date(newRefreshTokenExp * 1000).toISOString(),
     );
 
     return {

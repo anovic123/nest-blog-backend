@@ -30,7 +30,7 @@ export class SecurityRepository {
   ): Promise<void> {
     await this.AuthDeviceModel.updateOne(
       { device_id: deviceId, user_id: userId },
-      { $set: { iat: refreshTokenExp } },
+      { $set: { exp: refreshTokenExp } },
     );
   }
 

@@ -25,9 +25,10 @@ export class SecurityController {
   @UseGuards(RefreshTokenGuard)
   @Get('/devices')
   public async getAllDevices(@Req() request: RequestWithUser) {
-    const refreshToken = request.cookies['refreshToken'];
-
-    return this.securityService.getAllDevicesSessions(refreshToken);
+    return this.securityService.getAllDevicesSessions(
+      request.userId!,
+      request.deviceId!,
+    );
   }
 
   // delete all sessions, but not current
@@ -35,9 +36,7 @@ export class SecurityController {
   @Delete('/devices')
   @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteAllOtherDevicesSessions(@Req() req: RequestWithUser) {
-    const refreshToken = req.cookies['refreshToken'];
-
-    return this.securityService.deleteAllSessions(refreshToken);
+    return this.securityService.deleteAllSessions(req.userId!, req.deviceId!);
   }
 
   @UseGuards(RefreshTokenGuard)
@@ -47,8 +46,6 @@ export class SecurityController {
     @Param('deviceId') deviceId: string,
     @Req() request: RequestWithUser,
   ) {
-    const refreshToken = request.cookies['refreshToken'];
-
-    return this.securityService.deleteSessionById(refreshToken, deviceId);
+    return this.securityService.deleteSessionById(request.userId!, deviceId);
   }
 }

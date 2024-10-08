@@ -1,4 +1,6 @@
 import {
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -20,19 +22,13 @@ export class SecurityService {
     return this.securityRepository.findSessionByDeviceId(deviceId);
   }
 
-  public async deleteSessionById(refreshToken: string, deviceId: string) {
-    const refreshTokenData = await this.jwtService.getDataFromRefreshToken(
-      refreshToken,
-      this.securityRepository.findSessionByDeviceId.bind(
-        this.securityRepository,
-      ),
-    );
+  public async deleteSessionById(userId: string, deviceId: string) {
+    const findDevice =
+      await this.securityRepository.findSessionByDeviceId(deviceId);
 
-    if (!refreshTokenData) {
-      throw new UnauthorizedException();
+    if (!findDevice) {
+      throw new NotFoundException();
     }
-
-    const userId = refreshTokenData.userId;
 
     const checkDeviceUser = await this.securityRepository.checkUserDeviceById(
       userId,
@@ -40,43 +36,17 @@ export class SecurityService {
     );
 
     if (!checkDeviceUser) {
-      throw new NotFoundException();
+      throw new HttpException('session', HttpStatus.FORBIDDEN);
     }
 
     await this.securityRepository.deleteUserDeviceById(deviceId);
   }
 
-  public async deleteAllSessions(refreshToken: string) {
-    const refreshTokenData = await this.jwtService.getDataFromRefreshToken(
-      refreshToken,
-      this.securityRepository.findSessionByDeviceId.bind(
-        this.securityRepository,
-      ),
-    );
-
-    if (!refreshTokenData) {
-      throw new UnauthorizedException();
-    }
-
-    const { userId, deviceId } = refreshTokenData;
-
+  public async deleteAllSessions(userId: string, deviceId: string) {
     await this.securityRepository.deleteAllSessions(userId, deviceId);
   }
 
-  public async getAllDevicesSessions(refreshToken: string) {
-    const refreshTokenData = await this.jwtService.getDataFromRefreshToken(
-      refreshToken,
-      this.securityRepository.findSessionByDeviceId.bind(
-        this.securityRepository,
-      ),
-    );
-
-    if (!refreshTokenData) {
-      throw new UnauthorizedException();
-    }
-
-    const { userId } = refreshTokenData;
-
+  public async getAllDevicesSessions(userId: string, deviceId: string) {
     return this.securityQueryRepository.findSessionsByUserId(userId);
   }
 }
